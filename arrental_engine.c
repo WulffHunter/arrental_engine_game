@@ -165,7 +165,13 @@ void AE_CloseSDL()
  */
 Uint32 AE_GetSurfacePixel(SDL_Surface* surface, int x, int y)
 {
-    return ((Uint32*) surface->pixels)[y*(surface->pitch/sizeof(Uint32))+x];
+    SDL_LockSurface(surface);
+    
+    Uint32 output = ((Uint32*) surface->pixels)[y*(surface->pitch/sizeof(Uint32))+x];
+    
+    SDL_UnlockSurface(surface);
+    
+    return output;
 }
 
 /**
@@ -187,8 +193,9 @@ SDL_Texture* AE_LoadTextureFromFile(SDL_Renderer* renderer, char* path)
     }
     else
     {
-        //Color key the image based on the bottom-left pixel
-        if (SDL_SetColorKey(loaded, SDL_TRUE, SDL_MapRGB(loaded->format, 0, 255, 255)) < 0)
+        //Color key the image based on the bottom-left pixel (CURRENTLY BROKEN: PLEASE USE TRANSPARENT ALPHA FOR BLANK BACKGROUND)
+        //if (SDL_SetColorKey(loaded, SDL_TRUE, SDL_MapRGB(loaded->format, 0, 255, 255)) < 0)
+        if (SDL_SetColorKey(loaded, SDL_TRUE, AE_GetSurfacePixel(loaded, 0, loaded->h-1)) < 0)
         {
             printf("Failed to color key. Error: %s\n", IMG_GetError());
         }

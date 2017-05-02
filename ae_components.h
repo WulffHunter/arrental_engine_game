@@ -16,8 +16,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#endif /* ae_components_h */
-
 //
 //STRUCTS FOR GAMEPLAY
 //
@@ -83,6 +81,7 @@ typedef struct {
     int x;
     int y;
     int z;
+    SDL_RendererFlip reflection;
 } DISPLACEMENT;
 
 typedef struct {
@@ -101,9 +100,10 @@ typedef struct {
     AE_Sprite bodySprites[4];
     SDL_bool draw_part[4];
     int distance_from_base;
-    SDL_RendererFlip reflection;
     int_least8_t gender;
-    int_least8_t legIn;
+    SDL_bool leg_in;
+    float leg_movement_time;
+    float leg_clock;
     float x_scale;
     float y_scale;
 } CHARACTER_SPRITE;
@@ -212,3 +212,7 @@ void AEC_RenderSpriteBuffer(AEC_SpriteBuffer* sprite_buffer, AEC_EntityCatalog* 
 void AEC_FlushSpriteBuffer(AEC_SpriteBuffer* spriteBuffer);
 
 AEC_SpriteBuffer* AEC_Create_SpriteBuffer();
+
+void AEC_CharacterMoveLegs(AEC_EntityCatalog* entityCatalog, unsigned int entity_at, float step);
+
+#endif /* ae_components_h */

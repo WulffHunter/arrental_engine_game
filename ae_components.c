@@ -109,6 +109,7 @@ SDL_bool AEC_CharacterSprite_CreateNew(int entity_id, AEC_EntityCatalog* entityC
             entityCatalog->character_sprite[search].x_scale = 1;
             entityCatalog->character_sprite[search].y_scale = 1;
             entityCatalog->velocity[search].max_vel = 50;
+            entityCatalog->character_sprite[search].leg_movement_time = 0.15;
         }
     }
     return success;
@@ -135,6 +136,7 @@ SDL_bool AEC_Mask_CreateNew(int entity_id, AEC_EntityCatalog* entityCatalog, AE_
 
 void AEC_CharacterSprite_SetFlip(CHARACTER_SPRITE* characterSprite, SDL_RendererFlip flip)
 {
+    
     //For all of the bodyparts in the character sprite (NO MAGIC NUMBERS!)
     for (int i = 0; i < sizeof(characterSprite->bodySprites)/sizeof(characterSprite->bodySprites[0]); i++)
     {
@@ -148,17 +150,32 @@ void AEC_CharacterSprite_Render(CHARACTER_SPRITE* character_sprite, DISPLACEMENT
     int x = displacement->x;
     int y = displacement->y;
     
+    //The displacement of the leg on the body. It's 1 pixel, multiplied by the x_scale of the character
+    int leg_displacement = 0;
+    //If the character has its legs in, set the displacement
+    if (character_sprite->leg_in)
+    {
+        if (displacement->reflection == SDL_FLIP_HORIZONTAL)
+        {
+            leg_displacement = -character_sprite->x_scale;
+        }
+        else
+        {
+            leg_displacement = character_sprite->x_scale;
+        }
+    }
+    
     //If we're drawing the right leg, draw the right leg sprite
     if (character_sprite->draw_part[AEC_LEG_RIGHT] == SDL_TRUE)
     {
         AE_SpriteSetScale(&character_sprite->bodySprites[AEC_LEG_RIGHT], character_sprite->x_scale, character_sprite->y_scale, AE_SPRITE_KEEP_NONE);
-        AE_SpriteRender(&character_sprite->bodySprites[AEC_LEG_RIGHT], renderer, x-(AEC_CHARACTER_WIDTH/2)*character_sprite->x_scale, y-(AEC_CHARACTER_HEIGHT)*character_sprite->y_scale, 0, step);
+        AE_SpriteRender(&character_sprite->bodySprites[AEC_LEG_RIGHT], renderer, x-(AEC_CHARACTER_WIDTH/2)*character_sprite->x_scale-leg_displacement, y-(AEC_CHARACTER_HEIGHT)*character_sprite->y_scale, 0, step);
     }
     //If we're drawing the left leg, draw the left leg sprite
     if (character_sprite->draw_part[AEC_LEG_LEFT] == SDL_TRUE)
     {
         AE_SpriteSetScale(&character_sprite->bodySprites[AEC_LEG_LEFT], character_sprite->x_scale, character_sprite->y_scale, AE_SPRITE_KEEP_NONE);
-        AE_SpriteRender(&character_sprite->bodySprites[AEC_LEG_LEFT], renderer, x-(AEC_CHARACTER_WIDTH/2)*character_sprite->x_scale, y-(AEC_CHARACTER_HEIGHT)*character_sprite->y_scale, 0, step);
+        AE_SpriteRender(&character_sprite->bodySprites[AEC_LEG_LEFT], renderer, x-(AEC_CHARACTER_WIDTH/2)*character_sprite->x_scale+leg_displacement, y-(AEC_CHARACTER_HEIGHT)*character_sprite->y_scale, 0, step);
     }
     //If we're drawing the torso, draw the torso sprite
     if (character_sprite->draw_part[AEC_TORSO])
@@ -291,13 +308,16 @@ void AEC_DisplacementUpdate_ByVelocity(AEC_EntityCatalog* entityCatalog, float s
                     entityCatalog->displacement[search].y += AE_FloatBase(entityCatalog->velocity[search].yVel * step);
                     if (current_x < new_x)
                     {
+                        entityCatalog->displacement[search].reflection = SDL_FLIP_HORIZONTAL;
                         AEC_CharacterSprite_SetFlip(&entityCatalog->character_sprite[search], SDL_FLIP_HORIZONTAL);
                     }
                     else if (current_x > new_x)
                     {
+                        entityCatalog->displacement[search].reflection = SDL_FLIP_NONE;
                         AEC_CharacterSprite_SetFlip(&entityCatalog->character_sprite[search], SDL_FLIP_NONE);
                     }
                 }
+                AEC_CharacterMoveLegs(entityCatalog, search, step);
             }
         }
     }
@@ -458,15 +478,15 @@ void AEC_RenderCatalogToBuffer(AEC_EntityCatalog* entityCatalog, AEC_SpriteBuffe
             //while (spriteBuffer->y[heap_at / 2] > y && spriteBuffer->x[heap_at / 2] > x && spriteBuffer->z[heap_at / 2] > z && spriteBuffer->is_filled[heap_at / 2])
             
             //ORIGINAL CODE
-            while ((heap_at)/2 > 0 && spriteBuffer->y[(heap_at) / 2] >= y && spriteBuffer->is_filled[(heap_at) / 2] == frame)
+            while (heap_at > 0 && spriteBuffer->y[heap_at-1] >= y && spriteBuffer->is_filled[heap_at-1] == frame)
             {
-                spriteBuffer->entity[heap_at] = spriteBuffer->entity[(heap_at)/2];
-                spriteBuffer->depth[heap_at] = spriteBuffer->depth[(heap_at)/2];
-                spriteBuffer->x[heap_at] = spriteBuffer->x[(heap_at)/2];
-                spriteBuffer->y[heap_at] = spriteBuffer->y[(heap_at)/2];
-                spriteBuffer->z[heap_at] = spriteBuffer->z[(heap_at)/2];
+                spriteBuffer->entity[heap_at] = spriteBuffer->entity[heap_at-1];
+                spriteBuffer->depth[heap_at] = spriteBuffer->depth[heap_at-1];
+                spriteBuffer->x[heap_at] = spriteBuffer->x[heap_at-1];
+                spriteBuffer->y[heap_at] = spriteBuffer->y[heap_at-1];
+                spriteBuffer->z[heap_at] = spriteBuffer->z[heap_at-1];
                 
-                heap_at = (heap_at)/2;
+                heap_at = heap_at-1;
             }
             
             //ORIGINAL CODE
@@ -481,7 +501,7 @@ void AEC_RenderCatalogToBuffer(AEC_EntityCatalog* entityCatalog, AEC_SpriteBuffe
     }
     spriteBuffer->size = heap_size;
     spriteBuffer->frame = frame;
-    printf("Checking: ");
+    /**printf("Checking: ");
     for (int q=0;q<heap_size+1;q++)
     {
         if (spriteBuffer->is_filled[q] == frame)
@@ -489,7 +509,7 @@ void AEC_RenderCatalogToBuffer(AEC_EntityCatalog* entityCatalog, AEC_SpriteBuffe
             printf("%d ", spriteBuffer->y[q]);
         }
     }
-    printf("\n");
+    printf("\n");*/
 }
 
 void AEC_RenderSpriteBuffer(AEC_SpriteBuffer* spriteBuffer, AEC_EntityCatalog* entityCatalog, SDL_Renderer* renderer, float step)
@@ -550,4 +570,29 @@ AE_ColorBundle* AEC_GetRandomSkinColor()
         output->b = AE_BlendColorChannel(b, 0x00, tone);
     }
     return output;
+}
+
+void AEC_CharacterMoveLegs(AEC_EntityCatalog* entityCatalog, unsigned int entity_at, float step)
+{
+    if (entityCatalog->entity_components[entity_at].component_mask[AEC_CHARACTER_SPRITE] && entityCatalog->entity_components[entity_at].component_mask[AEC_VELOCITY])
+    {
+        if (entityCatalog->velocity[entity_at].moving)
+        {
+            //Add the current step to the leg clock
+            entityCatalog->character_sprite[entity_at].leg_clock += step;
+            //If it's time for the legs to change
+            if (entityCatalog->character_sprite[entity_at].leg_clock >= entityCatalog->character_sprite[entity_at].leg_movement_time)
+            {
+                //Set the current clock to the modded clock time
+                entityCatalog->character_sprite[entity_at].leg_clock = fmodf(entityCatalog->character_sprite[entity_at].leg_clock, entityCatalog->character_sprite[entity_at].leg_movement_time);
+                //Reverse leg_in
+                entityCatalog->character_sprite[entity_at].leg_in = (!entityCatalog->character_sprite[entity_at].leg_in);
+            }
+        }
+        else
+        {
+            entityCatalog->character_sprite[entity_at].leg_in = SDL_FALSE;
+            entityCatalog->character_sprite[entity_at].leg_clock = 0;
+        }
+    }
 }
