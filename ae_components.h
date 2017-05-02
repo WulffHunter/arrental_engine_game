@@ -86,6 +86,7 @@ typedef struct {
 
 typedef struct {
     SDL_bool direction_on[4];
+    SDL_bool just_started_moving;
     SDL_bool moving;
     int max_vel;
     int xVel;

@@ -285,6 +285,17 @@ void AEC_VelocityUpdateSimple(AEC_EntityCatalog* entityCatalog)
                     xVel = 0;
                     yVel = 0;
                 }
+                if (moving)
+                {
+                    if (!entityCatalog->velocity[search].moving)
+                    {
+                        entityCatalog->velocity[search].just_started_moving = SDL_TRUE;
+                    }
+                    else
+                    {
+                        entityCatalog->velocity[search].just_started_moving = SDL_FALSE;
+                    }
+                }
                 entityCatalog->velocity[search].moving = moving;
                 entityCatalog->velocity[search].xVel = xVel;
                 entityCatalog->velocity[search].yVel = yVel;
@@ -578,6 +589,11 @@ void AEC_CharacterMoveLegs(AEC_EntityCatalog* entityCatalog, unsigned int entity
     {
         if (entityCatalog->velocity[entity_at].moving)
         {
+            //If the character just started moving, the legs begin inwards
+            if (entityCatalog->velocity[entity_at].just_started_moving)
+            {
+                entityCatalog->character_sprite[entity_at].leg_in = SDL_TRUE;
+            }
             //Add the current step to the leg clock
             entityCatalog->character_sprite[entity_at].leg_clock += step;
             //If it's time for the legs to change
