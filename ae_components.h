@@ -234,7 +234,7 @@ void AEC_CharacterMoveLegs(AEC_EntityCatalog* entityCatalog, unsigned int entity
 
 void AEC_CameraRefocus(AEC_EntityCatalog* entityCatalog, unsigned int target_entity, AEC_Camera* camera);
 
-AEC_Camera* AEC_CameraCreate(Uint64 x, Uint64 y);
+AEC_Camera* AEC_CameraCreate(Uint64 x, Uint64 y, Uint64 w, Uint64 h);
 
 SDL_bool AEC_Drawable_IsInCamera(AEC_EntityCatalog* entityCatalog, unsigned int entity_at, AEC_Camera* camera);
 

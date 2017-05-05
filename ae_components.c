@@ -663,12 +663,12 @@ void AEC_CameraRefocus(AEC_EntityCatalog* entityCatalog, unsigned int target_ent
     }
 }
 
-AEC_Camera* AEC_CameraCreate(Uint64 x, Uint64 y)
+AEC_Camera* AEC_CameraCreate(Uint64 x, Uint64 y, Uint64 w, Uint64 h)
 {
     AEC_Camera* output = malloc(sizeof(AEC_Camera));
     output->x = x;
     output->y = y;
-    output->w = 100;
-    output->h = 100;
+    output->w = w;
+    output->h = h;
     return output;
 }

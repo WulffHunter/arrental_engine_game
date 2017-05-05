@@ -17,7 +17,8 @@
 
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
-const unsigned int MAX_SIZE = 254;
+const Uint64 CAMERA_WIDTH = 300;
+const Uint64 CAMERA_HEIGHT = 300;
 const int JOYSTICK_DEAD_ZONE = 8000;
 const unsigned int TEST_CITIZEN_NUM = 100;
 
@@ -212,12 +213,12 @@ int main(int argc, const char* argv[])
         
         SDL_Event e;
         
-        AEC_Camera* camera = AEC_CameraCreate(0, 0);
+        AEC_Camera* camera = AEC_CameraCreate(0, 0, CAMERA_WIDTH, CAMERA_HEIGHT);
         SDL_Rect viewRect;
         viewRect.x = 0;
         viewRect.y = 0;
-        viewRect.w = 100;
-        viewRect.h = 100;
+        viewRect.w = (int)camera->w;
+        viewRect.h = (int)camera->h;
         
         Uint64 seed = AE_RandomSeed();
         Uint8 grass_set = 0;
@@ -314,7 +315,16 @@ int main(int argc, const char* argv[])
             AEC_DisplacementUpdate_ByVelocity(entityCatalog, time);
             
             //Refocus the camera before rendering
-            AEC_CameraRefocus(entityCatalog, 1, camera);
+            AEC_CameraRefocus(entityCatalog, 0, camera);
+            
+            if (AEC_Drawable_IsInCamera(entityCatalog, 1, camera))
+            {
+                printf("Here!\n");
+            }
+            else
+            {
+                printf("\n");
+            }
             
             AEC_RenderCatalogToBuffer(entityCatalog, spriteBuffer);
             AEC_RenderSpriteBuffer(spriteBuffer, entityCatalog, camera, windowBundle->renderer, time);
