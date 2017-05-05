@@ -25,6 +25,13 @@ typedef struct {
     int y;
 } AEC_TrailPoint;
 
+typedef struct {
+    Uint64 x;
+    Uint64 y;
+    Uint64 w;
+    Uint64 h;
+} AEC_Camera;
+
 //
 //STRUCTS FOR GAMEPLAY
 //
@@ -78,11 +85,17 @@ typedef struct {
 } COMPONENTS;
 
 typedef struct {
-    int x;
-    int y;
+    //These reference the world x and world y
+    Uint64 x;
+    Uint64 y;
     int z;
     SDL_RendererFlip reflection;
 } DISPLACEMENT;
+
+typedef struct {
+    unsigned int width;
+    unsigned int height;
+} DRAWABLE;
 
 typedef struct {
     SDL_bool direction_on[4];
@@ -138,10 +151,10 @@ typedef struct
     unsigned int size;
     int frame;
     int is_filled[AEC_ENTITY_COUNT + 1];
-    int depth[AEC_ENTITY_COUNT + 1];
-    int x[AEC_ENTITY_COUNT + 1];
-    int y[AEC_ENTITY_COUNT + 1];
-    int z[AEC_ENTITY_COUNT + 1];
+    Uint64 depth[AEC_ENTITY_COUNT + 1];
+    Uint64 x[AEC_ENTITY_COUNT + 1];
+    Uint64 y[AEC_ENTITY_COUNT + 1];
+    Uint64 z[AEC_ENTITY_COUNT + 1];
     int entity[AEC_ENTITY_COUNT + 1];
 } AEC_SpriteBuffer;
 
@@ -153,6 +166,7 @@ typedef struct {
     int entity_id[AEC_ENTITY_COUNT];
     COMPONENTS entity_components[AEC_ENTITY_COUNT];
     DISPLACEMENT displacement[AEC_ENTITY_COUNT];
+    DRAWABLE drawable[AEC_ENTITY_COUNT];
     VELOCITY velocity[AEC_ENTITY_COUNT];
     MASK mask[AEC_ENTITY_COUNT];
     CHARACTER_SPRITE character_sprite[AEC_ENTITY_COUNT];
@@ -190,7 +204,9 @@ AE_ColorBundle* AEC_GetRandomSkinColor();
 
 void AEC_CharacterSprite_SetFlip(CHARACTER_SPRITE* characterSprite, SDL_RendererFlip flip);
 
-void AEC_CharacterSprite_Render(CHARACTER_SPRITE* character_sprite, DISPLACEMENT* displacement, SDL_Renderer* renderer, float step);
+void AEC_CharacterSprite_Render(CHARACTER_SPRITE* character_sprite, DISPLACEMENT* displacement, AEC_Camera* camera, SDL_Renderer* renderer, float step);
+
+void AEC_Mask_Render(MASK* mask, DISPLACEMENT* displacement, float x_scale, float y_scale, AEC_Camera* camera, SDL_Renderer* renderer, float step);
 
 void AEC_VelocityUpdateSimple(AEC_EntityCatalog* entityCatalog);
 
@@ -200,20 +216,26 @@ void AEC_PlayerControlled_GetInput(AEC_EntityCatalog* entityCatalog, SDL_Event e
 
 void AEC_SetPlayerKeys(AEC_EntityCatalog* entityCatalog, int entity_id, SDL_Keycode* keys);
 
-void AEC_Entities_Render(AEC_EntityCatalog* entityCatalog, SDL_Renderer* renderer, float step);
+void AEC_Entities_Render(AEC_EntityCatalog* entityCatalog, AEC_Camera* camera, SDL_Renderer* renderer, float step);
 
-void AEC_RenderEntity(AEC_EntityCatalog* entityCatalog, unsigned int entity_at, SDL_Renderer* renderer, float step);
+void AEC_RenderEntity(AEC_EntityCatalog* entityCatalog, unsigned int entity_at, AEC_Camera* camera, SDL_Renderer* renderer, float step);
 
-int AEC_GetIsoDepth(AEC_EntityCatalog* entityCatalog, unsigned int entity_at);
+Uint64 AEC_GetIsoDepth(AEC_EntityCatalog* entityCatalog, unsigned int entity_at);
 
 void AEC_RenderCatalogToBuffer(AEC_EntityCatalog* entityCatalog, AEC_SpriteBuffer* sprite_buffer);
 
-void AEC_RenderSpriteBuffer(AEC_SpriteBuffer* sprite_buffer, AEC_EntityCatalog* entityCatalog, SDL_Renderer* renderer, float step);
+void AEC_RenderSpriteBuffer(AEC_SpriteBuffer* sprite_buffer, AEC_EntityCatalog* entityCatalog, AEC_Camera* camera, SDL_Renderer* renderer, float step);
 
 void AEC_FlushSpriteBuffer(AEC_SpriteBuffer* spriteBuffer);
 
 AEC_SpriteBuffer* AEC_Create_SpriteBuffer();
 
 void AEC_CharacterMoveLegs(AEC_EntityCatalog* entityCatalog, unsigned int entity_at, float step);
+
+void AEC_CameraRefocus(AEC_EntityCatalog* entityCatalog, unsigned int target_entity, AEC_Camera* camera);
+
+AEC_Camera* AEC_CameraCreate(Uint64 x, Uint64 y);
+
+SDL_bool AEC_Drawable_IsInCamera(AEC_EntityCatalog* entityCatalog, unsigned int entity_at, AEC_Camera* camera);
 
 #endif /* ae_components_h */

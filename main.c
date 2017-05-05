@@ -19,6 +19,7 @@ const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
 const unsigned int MAX_SIZE = 254;
 const int JOYSTICK_DEAD_ZONE = 8000;
+const unsigned int TEST_CITIZEN_NUM = 100;
 
 char* TORSO_IMG = "/Users/JJ/Documents/arrental_engine/arrental_engine/Images/base_torso.png";
 char* RLEG_IMG = "/Users/JJ/Documents/arrental_engine/arrental_engine/Images/base_right_leg.png";
@@ -199,7 +200,6 @@ void initJoystick(SDL_Joystick* joystick)
 
 int main(int argc, const char* argv[])
 {
-    
     AE_WindowBundle* windowBundle = AE_Initialize("Arrental Engine Test", SCREEN_WIDTH, SCREEN_HEIGHT, true);
     
     if (!windowBundle->initSuccess)
@@ -211,6 +211,13 @@ int main(int argc, const char* argv[])
         bool quit = false;
         
         SDL_Event e;
+        
+        AEC_Camera* camera = AEC_CameraCreate(0, 0);
+        SDL_Rect viewRect;
+        viewRect.x = 0;
+        viewRect.y = 0;
+        viewRect.w = 100;
+        viewRect.h = 100;
         
         Uint64 seed = AE_RandomSeed();
         Uint8 grass_set = 0;
@@ -232,7 +239,7 @@ int main(int argc, const char* argv[])
         AEC_EntityCatalog* entityCatalog = malloc(sizeof(AEC_EntityCatalog));
         AEC_SpriteBuffer* spriteBuffer = AEC_Create_SpriteBuffer();
         
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < TEST_CITIZEN_NUM; i++)
         {
             AEC_CreateNewCharacter(entityCatalog, spriteSheet, char_mask);
             entityCatalog->displacement[i].x = AE_Random(32, SCREEN_WIDTH-32);
@@ -252,7 +259,7 @@ int main(int argc, const char* argv[])
             entityCatalog->player_controlled[1].joystick_id = SDL_JoystickInstanceID(entityCatalog->player_controlled[1].joystick);
         }
         
-        
+        AEC_CameraRefocus(entityCatalog, 1, camera);
         
         AE_Timer* stepTimer = AE_Create_Timer();
         
@@ -267,7 +274,7 @@ int main(int argc, const char* argv[])
                 const Uint8* currentKeyStates = SDL_GetKeyboardState(NULL);
                 if (currentKeyStates[SDL_SCANCODE_Q])
                 {
-                    for (int i = 0; i < 100; i++)
+                    for (int i = 0; i < TEST_CITIZEN_NUM; i++)
                     {
                         entityCatalog->displacement[i].x = AE_Random(32, SCREEN_WIDTH-32);
                         entityCatalog->displacement[i].y = AE_Random(32, SCREEN_HEIGHT-32);
@@ -279,7 +286,7 @@ int main(int argc, const char* argv[])
                 }
                 if (currentKeyStates[SDL_SCANCODE_E])
                 {
-                    for (int i = 0; i < 100; i++)
+                    for (int i = 0; i < TEST_CITIZEN_NUM; i++)
                     {
                         entityCatalog->displacement[i].x = AE_Random(32, SCREEN_WIDTH-32);
                         entityCatalog->displacement[i].y = AE_Random(32, SCREEN_HEIGHT-32);
@@ -302,17 +309,22 @@ int main(int argc, const char* argv[])
             grasstiler_render(tiler, windowBundle->renderer, time);
             //worldtiler_render(world_tiler, windowBundle->renderer, time);
             
+            SDL_RenderDrawRect(windowBundle->renderer, &viewRect);
+            
             AEC_DisplacementUpdate_ByVelocity(entityCatalog, time);
             
+            //Refocus the camera before rendering
+            AEC_CameraRefocus(entityCatalog, 1, camera);
+            
             AEC_RenderCatalogToBuffer(entityCatalog, spriteBuffer);
-            AEC_RenderSpriteBuffer(spriteBuffer, entityCatalog, windowBundle->renderer, time);
+            AEC_RenderSpriteBuffer(spriteBuffer, entityCatalog, camera, windowBundle->renderer, time);
             //AEC_Entities_Render(entityCatalog, windowBundle->renderer, time);
             
             AE_Timer_Start(stepTimer);
             
             SDL_RenderPresent(windowBundle->renderer);
             
-            AEC_FlushSpriteBuffer(spriteBuffer);
+            //AEC_FlushSpriteBuffer(spriteBuffer);
         }
         AE_DestroyLinkedTexture_Unsafe(spriteSheet);
     }

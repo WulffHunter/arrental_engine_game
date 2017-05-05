@@ -39,6 +39,11 @@ int AEC_CreateNewCharacter(AEC_EntityCatalog* entityCatalog, AE_LinkedTexture* c
         AEC_CharacterSprite_CreateNew(entity_at + 1, entityCatalog, characterSpriteSheet);
         AEC_Mask_CreateNew(entity_at + 1, entityCatalog, maskSpriteSheet);
         
+        //TESTING CODE!!!
+        entityCatalog->drawable[entity_at + 1].width = 32;
+        entityCatalog->drawable[entity_at + 1].height = 32;
+        //TESTING CODE!!!
+        
         //If the entity was created, return the id of that entity
         return entity_at + 1;
     }
@@ -53,11 +58,11 @@ SDL_bool AEC_Entity_SetPlayable(AEC_EntityCatalog* entityCatalog, int entity_id,
     SDL_bool success = SDL_FALSE;
     if (entity_id > 0 && entity_id < AEC_ENTITY_COUNT)
     {
-        entityCatalog->entity_components[entity_id-1].component_mask[AEC_PLAYER_CONTROLLED] = isPlayable;
-        entityCatalog->entity_components[entity_id-1].component_mask[AEC_NPC_MOVEMENT_AI] = !isPlayable;
+        entityCatalog->entity_components[entity_id - 1].component_mask[AEC_PLAYER_CONTROLLED] = isPlayable;
+        entityCatalog->entity_components[entity_id - 1].component_mask[AEC_NPC_MOVEMENT_AI] = !isPlayable;
         if (isPlayable)
         {
-            entityCatalog->player_controlled[entity_id-1].player_id = player_id;
+            entityCatalog->player_controlled[entity_id - 1].player_id = player_id;
         }
         success = SDL_TRUE;
     }
@@ -144,11 +149,11 @@ void AEC_CharacterSprite_SetFlip(CHARACTER_SPRITE* characterSprite, SDL_Renderer
     }
 }
 
-void AEC_CharacterSprite_Render(CHARACTER_SPRITE* character_sprite, DISPLACEMENT* displacement, SDL_Renderer* renderer, float step)
+void AEC_CharacterSprite_Render(CHARACTER_SPRITE* character_sprite, DISPLACEMENT* displacement, AEC_Camera* camera, SDL_Renderer* renderer, float step)
 {
     //Save the x and y to cut down on dereferences
-    int x = displacement->x;
-    int y = displacement->y;
+    int x = (int)(displacement->x - camera->x);
+    int y = (int)(displacement->y - camera->y);
     
     //The displacement of the leg on the body. It's 1 pixel, multiplied by the x_scale of the character
     int leg_displacement = 0;
@@ -191,14 +196,15 @@ void AEC_CharacterSprite_Render(CHARACTER_SPRITE* character_sprite, DISPLACEMENT
     }
 }
 
-void AEC_Mask_Render(MASK* mask, DISPLACEMENT* displacement, float x_scale, float y_scale, SDL_Renderer* renderer, float step)
+void AEC_Mask_Render(MASK* mask, DISPLACEMENT* displacement, float x_scale, float y_scale, AEC_Camera* camera, SDL_Renderer* renderer, float step)
 {
-    AE_SpriteRender(&mask->sprite, renderer, displacement->x-(AEC_CHARACTER_WIDTH/2)*x_scale, displacement->y-(AEC_CHARACTER_HEIGHT)*y_scale, 0, step);
+    int x = (int)(displacement->x - camera->x);
+    int y = (int)(displacement->y - camera->y);
+    AE_SpriteRender(&mask->sprite, renderer, x-(AEC_CHARACTER_WIDTH/2)*x_scale, y-(AEC_CHARACTER_HEIGHT)*y_scale, 0, step);
 }
 
-void AEC_Entities_Render(AEC_EntityCatalog* entityCatalog, SDL_Renderer* renderer, float step)
+void AEC_Entities_Render(AEC_EntityCatalog* entityCatalog, AEC_Camera* camera, SDL_Renderer* renderer, float step)
 {
-    
     for (int search = 0; search < AEC_ENTITY_COUNT; search++)
     {
         if (entityCatalog->entity_id[search] > 0)
@@ -208,31 +214,31 @@ void AEC_Entities_Render(AEC_EntityCatalog* entityCatalog, SDL_Renderer* rendere
             {
                 if (entityCatalog->entity_components[search].component_mask[AEC_MASK])
                 {
-                    AEC_Mask_Render(&entityCatalog->mask[search], &entityCatalog->displacement[search], 1, 1, renderer, step);
+                    AEC_Mask_Render(&entityCatalog->mask[search], &entityCatalog->displacement[search], 1, 1, camera, renderer, step);
                 }
                 if (entityCatalog->entity_components[search].component_mask[AEC_CHARACTER_SPRITE])
                 {
-                    AEC_CharacterSprite_Render(&entityCatalog->character_sprite[search], &entityCatalog->displacement[search], renderer, step);
+                    AEC_CharacterSprite_Render(&entityCatalog->character_sprite[search], &entityCatalog->displacement[search], camera, renderer, step);
                 }
             }
         }
     }
 }
 
-void AEC_RenderEntity(AEC_EntityCatalog* entityCatalog, unsigned int entity_at, SDL_Renderer* renderer, float step)
+void AEC_RenderEntity(AEC_EntityCatalog* entityCatalog, unsigned int entity_at, AEC_Camera* camera, SDL_Renderer* renderer, float step)
 {
     if (entityCatalog->entity_id[entity_at] > 0)
         {
             //If there is a character sprite and a displacement and it's drawable
-        if (entityCatalog->entity_components[entity_at].component_mask[AEC_DISPLACEMENT] && entityCatalog->entity_components[entity_at].component_mask[AEC_DRAWABLE])
+        if (entityCatalog->entity_components[entity_at].component_mask[AEC_DISPLACEMENT] && entityCatalog->entity_components[entity_at].component_mask[AEC_DRAWABLE] && AEC_Drawable_IsInCamera(entityCatalog, entity_at, camera))
         {
             if (entityCatalog->entity_components[entity_at].component_mask[AEC_MASK])
             {
-                AEC_Mask_Render(&entityCatalog->mask[entity_at], &entityCatalog->displacement[entity_at], 1, 1, renderer, step);
+                AEC_Mask_Render(&entityCatalog->mask[entity_at], &entityCatalog->displacement[entity_at], 1, 1, camera, renderer, step);
             }
             if (entityCatalog->entity_components[entity_at].component_mask[AEC_CHARACTER_SPRITE])
             {
-                AEC_CharacterSprite_Render(&entityCatalog->character_sprite[entity_at], &entityCatalog->displacement[entity_at], renderer, step);
+                AEC_CharacterSprite_Render(&entityCatalog->character_sprite[entity_at], &entityCatalog->displacement[entity_at], camera, renderer, step);
             }
         }
     }
@@ -314,8 +320,8 @@ void AEC_DisplacementUpdate_ByVelocity(AEC_EntityCatalog* entityCatalog, float s
             {
                 if (entityCatalog->velocity[search].moving)
                 {
-                    int current_x = entityCatalog->displacement[search].x;
-                    int new_x = (entityCatalog->displacement[search].x += AE_FloatBase(entityCatalog->velocity[search].xVel * step));
+                    Uint64 current_x = entityCatalog->displacement[search].x;
+                    Uint64 new_x = (entityCatalog->displacement[search].x += AE_FloatBase(entityCatalog->velocity[search].xVel * step));
                     entityCatalog->displacement[search].y += AE_FloatBase(entityCatalog->velocity[search].yVel * step);
                     if (current_x < new_x)
                     {
@@ -448,7 +454,7 @@ void AEC_SetPlayerKeys(AEC_EntityCatalog* entityCatalog, int entity_id, SDL_Keyc
     }
 }
 
-int AEC_GetIsoDepth(AEC_EntityCatalog* entityCatalog, unsigned int entity_at)
+Uint64 AEC_GetIsoDepth(AEC_EntityCatalog* entityCatalog, unsigned int entity_at)
 {
     if (entityCatalog->entity_components[entity_at].component_mask[AEC_DISPLACEMENT])
     {
@@ -463,9 +469,9 @@ void AEC_RenderCatalogToBuffer(AEC_EntityCatalog* entityCatalog, AEC_SpriteBuffe
     unsigned int heap_size = 0;
     unsigned int heap_at = 1;
     int frame = spriteBuffer->frame + 1;
-    int x, y, z;
+    Uint64 x, y, z;
     //unsigned int i, parent;
-    int temp_depth;
+    Uint64 temp_depth;
     for (int search = 0; search < AEC_ENTITY_COUNT; search++)
     {
         if (entityCatalog->entity_components[search].component_mask[AEC_DRAWABLE] && entityCatalog->entity_components[search].component_mask[AEC_DISPLACEMENT])
@@ -476,19 +482,11 @@ void AEC_RenderCatalogToBuffer(AEC_EntityCatalog* entityCatalog, AEC_SpriteBuffe
             y = entityCatalog->displacement[search].y;
             z = entityCatalog->displacement[search].z;
             
-            //ORIGINAL CODE
+            //Prepare variables for heap insertion
             heap_size++;
             heap_at = heap_size;
             spriteBuffer->is_filled[heap_at] = frame;
             
-            //PART OF HEAP INSERT
-            //spriteBuffer->is_filled[heap_at+1] = frame;
-            
-            //While the parent is greater than the child and the parent is intended to be drawn, swap the parent and child data
-            //while (spriteBuffer->depth[heap_at / 2] > temp_depth && spriteBuffer->is_filled[heap_at / 2] == frame)
-            //while (spriteBuffer->y[heap_at / 2] > y && spriteBuffer->x[heap_at / 2] > x && spriteBuffer->z[heap_at / 2] > z && spriteBuffer->is_filled[heap_at / 2])
-            
-            //ORIGINAL CODE
             while (heap_at > 0 && spriteBuffer->y[heap_at-1] >= y && spriteBuffer->is_filled[heap_at-1] == frame)
             {
                 spriteBuffer->entity[heap_at] = spriteBuffer->entity[heap_at-1];
@@ -523,7 +521,7 @@ void AEC_RenderCatalogToBuffer(AEC_EntityCatalog* entityCatalog, AEC_SpriteBuffe
     printf("\n");*/
 }
 
-void AEC_RenderSpriteBuffer(AEC_SpriteBuffer* spriteBuffer, AEC_EntityCatalog* entityCatalog, SDL_Renderer* renderer, float step)
+void AEC_RenderSpriteBuffer(AEC_SpriteBuffer* spriteBuffer, AEC_EntityCatalog* entityCatalog, AEC_Camera* camera, SDL_Renderer* renderer, float step)
 {
     int frame = spriteBuffer->frame;
     //for (int i = AEC_ENTITY_COUNT; i > 0; i--)
@@ -531,33 +529,38 @@ void AEC_RenderSpriteBuffer(AEC_SpriteBuffer* spriteBuffer, AEC_EntityCatalog* e
     {
         if (spriteBuffer->is_filled[i] == frame)
         {
-            AEC_RenderEntity(entityCatalog, spriteBuffer->entity[i], renderer, step);
+            AEC_RenderEntity(entityCatalog, spriteBuffer->entity[i], camera, renderer, step);
         }
     }
 }
 
 void AEC_FlushSpriteBuffer(AEC_SpriteBuffer* spriteBuffer)
 {
+    //Clears out the entire sprite buffer
     for (int i = 0; i < AEC_ENTITY_COUNT; i++)
     {
         spriteBuffer->is_filled[i] = SDL_FALSE;
     }
 }
 
+//Creates an empty buffer for sprites before rendering
 AEC_SpriteBuffer* AEC_Create_SpriteBuffer()
 {
+    //Allocates the empty buffer
     AEC_SpriteBuffer* output = malloc(sizeof(AEC_SpriteBuffer));
     output->size = 0;
     output->frame = 0;
+    //Empties the entire arrays
     for (int i = 0; i < AEC_ENTITY_COUNT; i++)
     {
         output->depth[i] = 0;
         output->entity[i] = 0;
-        output->is_filled[i] = SDL_FALSE;
+        output->is_filled[i] = 0;
     }
     return output;
 }
 
+//Creates a randomized skin color in the range of realistic
 AE_ColorBundle* AEC_GetRandomSkinColor()
 {
     int_least8_t darken = (int_least8_t )AE_Random(0, 4);
@@ -587,6 +590,7 @@ void AEC_CharacterMoveLegs(AEC_EntityCatalog* entityCatalog, unsigned int entity
 {
     if (entityCatalog->entity_components[entity_at].component_mask[AEC_CHARACTER_SPRITE] && entityCatalog->entity_components[entity_at].component_mask[AEC_VELOCITY])
     {
+        //If the character is moving, move the legs
         if (entityCatalog->velocity[entity_at].moving)
         {
             //If the character just started moving, the legs begin inwards
@@ -606,9 +610,65 @@ void AEC_CharacterMoveLegs(AEC_EntityCatalog* entityCatalog, unsigned int entity
             }
         }
         else
+        //If the character isn't moving, reset the legs
         {
             entityCatalog->character_sprite[entity_at].leg_in = SDL_FALSE;
             entityCatalog->character_sprite[entity_at].leg_clock = 0;
         }
     }
+}
+
+SDL_bool AEC_Drawable_IsInCamera(AEC_EntityCatalog* entityCatalog, unsigned int entity_at, AEC_Camera* camera)
+{
+    if (entityCatalog->entity_components[entity_at].component_mask[AEC_DISPLACEMENT] && entityCatalog->entity_components[entity_at].component_mask[AEC_DRAWABLE])
+    {
+        int x_compare = (int)(entityCatalog->displacement[entity_at].x - camera->x);
+        int y_compare = (int)(entityCatalog->displacement[entity_at].y - camera->y);
+        //Return whether or not the entity is in the camera
+        /*return (
+            entityCatalog->displacement[entity_at].x + (entityCatalog->drawable[entity_at].width / 2) >= camera->x
+            && entityCatalog->displacement[entity_at].x - (entityCatalog->drawable[entity_at].width / 2) <= (camera->x + camera->w)
+            && entityCatalog->displacement[entity_at].y - (entityCatalog->drawable[entity_at].height) <= (camera->y + camera->h)
+            && entityCatalog->displacement[entity_at].y >= camera->y
+                );*/
+        //printf("%d %d %d %d\n", left_side, right_side, up_side, down_side);
+        return (
+            x_compare >= (int)((entityCatalog->drawable[entity_at].width / 2)*-1)
+            && x_compare <= (int)(camera->w + (entityCatalog->drawable[entity_at].width / 2))
+            && y_compare <= (int)(camera->h + (entityCatalog->drawable[entity_at].height))
+            && y_compare >= 0
+                );
+    }
+    return SDL_FALSE;
+}
+
+//TODO
+SDL_bool AEC_Drawable_IsIntersecting(AEC_EntityCatalog* entityCatalog, unsigned int entity1, unsigned int entity2)
+{
+    if (entityCatalog->entity_components[entity1].component_mask[AEC_DISPLACEMENT] && entityCatalog->entity_components[entity1].component_mask[AEC_DRAWABLE] && entityCatalog->entity_components[entity2].component_mask[AEC_DISPLACEMENT] && entityCatalog->entity_components[entity2].component_mask[AEC_DRAWABLE])
+    {
+        //Return whether the 2 entities are intersecting
+        //TODO
+        return SDL_TRUE;
+    }
+    return SDL_FALSE;
+}
+
+void AEC_CameraRefocus(AEC_EntityCatalog* entityCatalog, unsigned int target_entity, AEC_Camera* camera)
+{
+    if (entityCatalog->entity_components[target_entity].component_mask[AEC_DISPLACEMENT])
+    {
+        camera->x = entityCatalog->displacement[target_entity].x - (camera->w / 2);
+        camera->y = entityCatalog->displacement[target_entity].y - (camera->h / 2);
+    }
+}
+
+AEC_Camera* AEC_CameraCreate(Uint64 x, Uint64 y)
+{
+    AEC_Camera* output = malloc(sizeof(AEC_Camera));
+    output->x = x;
+    output->y = y;
+    output->w = 100;
+    output->h = 100;
+    return output;
 }
