@@ -21,16 +21,16 @@
 //
 
 typedef struct {
-    int x;
-    int y;
-} AEC_TrailPoint;
-
-typedef struct {
     uint64_t x;
     uint64_t y;
     uint64_t w;
     uint64_t h;
 } AEC_Camera;
+
+typedef struct {
+    uint64_t x;
+    uint64_t y;
+} AEC_TrailPoint;
 
 //
 //STRUCTS FOR GAMEPLAY
@@ -40,7 +40,7 @@ typedef struct {
 //ESSENTIAL VARIABLE: THE NUMBER OF AVAILIBLE COMPONENTS AND ENTITIES
 //
 
-static const unsigned int AEC_COMPONENT_COUNT = 8;
+static const unsigned int AEC_COMPONENT_COUNT = 9;
 static const unsigned int AEC_ENTITY_COUNT = 1000;
 static const unsigned int AEC_ENTITY_SPRITE_ALLOWANCE = 100;
 
@@ -75,6 +75,14 @@ typedef enum {
     AEC_KEY_INTERACT,
     AEC_KEY_ATTACK
 } AEC_DirectionKeys;
+
+typedef enum {
+    AEC_WEPTYPE_NONE,
+    AEC_WEPTYPE_SWORD,
+    AEC_WEPTYPE_BOW,
+    AEC_WEPTYPE_MAGIC,
+    AEC_WEPTYPE_POLEARM
+} AEC_WeaponTypes;
 
 //
 //ESSENTIAL VARIABLE: THE NUMBER OF AVAILIBLE COMPONENTS AND ENTITIES
@@ -139,24 +147,13 @@ typedef struct {
     int thirst;
     int work;
     int energy;
-    int entity_to_follow;
+    unsigned int entity_to_follow;
 } NPC_MOVEMENT_AI;
 
-//
-//THE STRUCT FOR DRAWING ALL SPRITES
-//
-
-typedef struct
-{
-    unsigned int size;
-    int frame;
-    int is_filled[AEC_ENTITY_COUNT + 1];
-    uint64_t depth[AEC_ENTITY_COUNT + 1];
-    uint64_t x[AEC_ENTITY_COUNT + 1];
-    uint64_t y[AEC_ENTITY_COUNT + 1];
-    uint64_t z[AEC_ENTITY_COUNT + 1];
-    int entity[AEC_ENTITY_COUNT + 1];
-} AEC_SpriteBuffer;
+typedef struct {
+    unsigned int weapon_type;
+    SDL_bool is_in_use;
+} WEAPON;
 
 //
 //THE STRUCT CONTAINING ALL COMPONENTS
@@ -173,6 +170,7 @@ typedef struct {
     TRAIL trail[AEC_ENTITY_COUNT];
     PLAYER_CONTROLLED player_controlled[AEC_ENTITY_COUNT];
     NPC_MOVEMENT_AI npc_movement_ai[AEC_ENTITY_COUNT];
+    WEAPON weapon[AEC_ENTITY_COUNT];
 } AEC_EntityCatalog;
 
 //
@@ -192,50 +190,24 @@ static const unsigned int AEC_CHARACTER_X_CONSTANT = 2;
 static const unsigned int AEC_CHARACTER_Y_CONSTANT = 2;
 static const int DEAD_ZONE = 8000;
 
-int AEC_CreateNewCharacter(AEC_EntityCatalog* entityCatalog, AE_LinkedTexture* characterSpriteSheet, AE_LinkedTexture* maskSpriteSheet);
-
-SDL_bool AEC_Entity_SetPlayable(AEC_EntityCatalog* entityCatalog, int entity_id, SDL_bool isPlayable, int player_id);
-
-SDL_bool AEC_CharacterSprite_CreateNew(int entity_id, AEC_EntityCatalog* entityCatalog, AE_LinkedTexture* characterSpriteSheet);
-
-SDL_bool AEC_Mask_CreateNew(int entity_id, AEC_EntityCatalog* entityCatalog, AE_LinkedTexture* maskSpriteSheet);
-
 AE_ColorBundle* AEC_GetRandomSkinColor();
-
-void AEC_CharacterSprite_SetFlip(CHARACTER_SPRITE* characterSprite, SDL_RendererFlip flip);
-
-void AEC_CharacterSprite_Render(CHARACTER_SPRITE* character_sprite, DISPLACEMENT* displacement, AEC_Camera* camera, SDL_Renderer* renderer, float step);
-
-void AEC_Mask_Render(MASK* mask, DISPLACEMENT* displacement, float x_scale, float y_scale, AEC_Camera* camera, SDL_Renderer* renderer, float step);
-
-void AEC_VelocityUpdateSimple(AEC_EntityCatalog* entityCatalog);
-
-void AEC_DisplacementUpdate_ByVelocity(AEC_EntityCatalog* entityCatalog, float step);
-
-void AEC_PlayerControlled_GetInput(AEC_EntityCatalog* entityCatalog, SDL_Event event);
-
-void AEC_SetPlayerKeys(AEC_EntityCatalog* entityCatalog, int entity_id, SDL_Keycode* keys);
-
-void AEC_Entities_Render(AEC_EntityCatalog* entityCatalog, AEC_Camera* camera, SDL_Renderer* renderer, float step);
-
-void AEC_RenderEntity(AEC_EntityCatalog* entityCatalog, unsigned int entity_at, AEC_Camera* camera, SDL_Renderer* renderer, float step);
 
 uint64_t AEC_GetIsoDepth(AEC_EntityCatalog* entityCatalog, unsigned int entity_at);
 
-void AEC_RenderCatalogToBuffer(AEC_EntityCatalog* entityCatalog, AEC_SpriteBuffer* sprite_buffer);
+//
+//
+//START: CAMERA FUNCTIONS
+//
+//
 
-void AEC_RenderSpriteBuffer(AEC_SpriteBuffer* sprite_buffer, AEC_EntityCatalog* entityCatalog, AEC_Camera* camera, SDL_Renderer* renderer, float step);
+AEC_Camera* AEC_Camera_CreateNew(uint64_t x, uint64_t y, uint64_t w, uint64_t h);
 
-void AEC_FlushSpriteBuffer(AEC_SpriteBuffer* spriteBuffer);
+void AEC_Camera_Refocus(AEC_EntityCatalog* entityCatalog, unsigned int target_entity, AEC_Camera* camera);
 
-AEC_SpriteBuffer* AEC_Create_SpriteBuffer();
-
-void AEC_CharacterMoveLegs(AEC_EntityCatalog* entityCatalog, unsigned int entity_at, float step);
-
-void AEC_CameraRefocus(AEC_EntityCatalog* entityCatalog, unsigned int target_entity, AEC_Camera* camera);
-
-AEC_Camera* AEC_CameraCreate(uint64_t x, uint64_t y, uint64_t w, uint64_t h);
-
-SDL_bool AEC_Drawable_IsInCamera(AEC_EntityCatalog* entityCatalog, unsigned int entity_at, AEC_Camera* camera);
+//
+//
+//END: CAMERA FUNCTIONS
+//
+//
 
 #endif /* ae_components_h */
