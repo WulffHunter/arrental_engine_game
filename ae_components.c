@@ -320,8 +320,8 @@ void AEC_DisplacementUpdate_ByVelocity(AEC_EntityCatalog* entityCatalog, float s
             {
                 if (entityCatalog->velocity[search].moving)
                 {
-                    Uint64 current_x = entityCatalog->displacement[search].x;
-                    Uint64 new_x = (entityCatalog->displacement[search].x += AE_FloatBase(entityCatalog->velocity[search].xVel * step));
+                    uint64_t current_x = entityCatalog->displacement[search].x;
+                    uint64_t new_x = (entityCatalog->displacement[search].x += AE_FloatBase(entityCatalog->velocity[search].xVel * step));
                     entityCatalog->displacement[search].y += AE_FloatBase(entityCatalog->velocity[search].yVel * step);
                     if (current_x < new_x)
                     {
@@ -454,7 +454,7 @@ void AEC_SetPlayerKeys(AEC_EntityCatalog* entityCatalog, int entity_id, SDL_Keyc
     }
 }
 
-Uint64 AEC_GetIsoDepth(AEC_EntityCatalog* entityCatalog, unsigned int entity_at)
+uint64_t AEC_GetIsoDepth(AEC_EntityCatalog* entityCatalog, unsigned int entity_at)
 {
     if (entityCatalog->entity_components[entity_at].component_mask[AEC_DISPLACEMENT])
     {
@@ -469,9 +469,9 @@ void AEC_RenderCatalogToBuffer(AEC_EntityCatalog* entityCatalog, AEC_SpriteBuffe
     unsigned int heap_size = 0;
     unsigned int heap_at = 1;
     int frame = spriteBuffer->frame + 1;
-    Uint64 x, y, z;
+    uint64_t x, y, z;
     //unsigned int i, parent;
-    Uint64 temp_depth;
+    uint64_t temp_depth;
     for (int search = 0; search < AEC_ENTITY_COUNT; search++)
     {
         if (entityCatalog->entity_components[search].component_mask[AEC_DRAWABLE] && entityCatalog->entity_components[search].component_mask[AEC_DISPLACEMENT])
@@ -597,6 +597,8 @@ void AEC_CharacterMoveLegs(AEC_EntityCatalog* entityCatalog, unsigned int entity
             if (entityCatalog->velocity[entity_at].just_started_moving)
             {
                 entityCatalog->character_sprite[entity_at].leg_in = SDL_TRUE;
+                entityCatalog->velocity[entity_at].just_started_moving = SDL_FALSE;
+                return;
             }
             //Add the current step to the leg clock
             entityCatalog->character_sprite[entity_at].leg_clock += step;
@@ -663,7 +665,7 @@ void AEC_CameraRefocus(AEC_EntityCatalog* entityCatalog, unsigned int target_ent
     }
 }
 
-AEC_Camera* AEC_CameraCreate(Uint64 x, Uint64 y, Uint64 w, Uint64 h)
+AEC_Camera* AEC_CameraCreate(uint64_t x, uint64_t y, uint64_t w, uint64_t h)
 {
     AEC_Camera* output = malloc(sizeof(AEC_Camera));
     output->x = x;

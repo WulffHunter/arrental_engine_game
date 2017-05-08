@@ -26,10 +26,10 @@ typedef struct {
 } AEC_TrailPoint;
 
 typedef struct {
-    Uint64 x;
-    Uint64 y;
-    Uint64 w;
-    Uint64 h;
+    uint64_t x;
+    uint64_t y;
+    uint64_t w;
+    uint64_t h;
 } AEC_Camera;
 
 //
@@ -86,8 +86,8 @@ typedef struct {
 
 typedef struct {
     //These reference the world x and world y
-    Uint64 x;
-    Uint64 y;
+    uint64_t x;
+    uint64_t y;
     int z;
     SDL_RendererFlip reflection;
 } DISPLACEMENT;
@@ -151,10 +151,10 @@ typedef struct
     unsigned int size;
     int frame;
     int is_filled[AEC_ENTITY_COUNT + 1];
-    Uint64 depth[AEC_ENTITY_COUNT + 1];
-    Uint64 x[AEC_ENTITY_COUNT + 1];
-    Uint64 y[AEC_ENTITY_COUNT + 1];
-    Uint64 z[AEC_ENTITY_COUNT + 1];
+    uint64_t depth[AEC_ENTITY_COUNT + 1];
+    uint64_t x[AEC_ENTITY_COUNT + 1];
+    uint64_t y[AEC_ENTITY_COUNT + 1];
+    uint64_t z[AEC_ENTITY_COUNT + 1];
     int entity[AEC_ENTITY_COUNT + 1];
 } AEC_SpriteBuffer;
 
@@ -220,7 +220,7 @@ void AEC_Entities_Render(AEC_EntityCatalog* entityCatalog, AEC_Camera* camera, S
 
 void AEC_RenderEntity(AEC_EntityCatalog* entityCatalog, unsigned int entity_at, AEC_Camera* camera, SDL_Renderer* renderer, float step);
 
-Uint64 AEC_GetIsoDepth(AEC_EntityCatalog* entityCatalog, unsigned int entity_at);
+uint64_t AEC_GetIsoDepth(AEC_EntityCatalog* entityCatalog, unsigned int entity_at);
 
 void AEC_RenderCatalogToBuffer(AEC_EntityCatalog* entityCatalog, AEC_SpriteBuffer* sprite_buffer);
 
@@ -234,7 +234,7 @@ void AEC_CharacterMoveLegs(AEC_EntityCatalog* entityCatalog, unsigned int entity
 
 void AEC_CameraRefocus(AEC_EntityCatalog* entityCatalog, unsigned int target_entity, AEC_Camera* camera);
 
-AEC_Camera* AEC_CameraCreate(Uint64 x, Uint64 y, Uint64 w, Uint64 h);
+AEC_Camera* AEC_CameraCreate(uint64_t x, uint64_t y, uint64_t w, uint64_t h);
 
 SDL_bool AEC_Drawable_IsInCamera(AEC_EntityCatalog* entityCatalog, unsigned int entity_at, AEC_Camera* camera);
 
