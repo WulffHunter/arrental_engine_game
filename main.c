@@ -15,18 +15,26 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "aec_character_sprite.h"
+#include "aec_displacement.h"
+#include "aec_drawable.h"
+#include "aec_mask.h"
+#include "aec_player_controlled.h"
+#include "aec_velocity.h"
+
+#include "aec_character.h"
+
+#include "aec_step.h"
+#include "aec_render.h"
+
 const int SCREEN_WIDTH = 640;
 const int SCREEN_HEIGHT = 480;
-const Uint64 CAMERA_WIDTH = 300;
-const Uint64 CAMERA_HEIGHT = 300;
+const unsigned int PLAYER_COUNT = 1;
+const uint64_t CAMERA_WIDTH = SCREEN_WIDTH;
+const uint64_t CAMERA_HEIGHT = SCREEN_HEIGHT / PLAYER_COUNT;
 const int JOYSTICK_DEAD_ZONE = 8000;
 const unsigned int TEST_CITIZEN_NUM = 100;
 
-char* TORSO_IMG = "/Users/JJ/Documents/arrental_engine/arrental_engine/Images/base_torso.png";
-char* RLEG_IMG = "/Users/JJ/Documents/arrental_engine/arrental_engine/Images/base_right_leg.png";
-char* LLEG_IMG = "/Users/JJ/Documents/arrental_engine/arrental_engine/Images/base_left_leg.png";
-char* CHEST_IMG = "/Users/JJ/Documents/arrental_engine/arrental_engine/Images/base_chest_male.png";
-char* ANIM_IMG = "/Users/JJ/Documents/arrental_engine/arrental_engine/Images/WulffAnimated.png";
 char* CHAR_SHEET = "/Users/JJ/Documents/arrental_engine/arrental_engine/Images/character_spritesheet.png";
 char* CHAR_MASK = "/Users/JJ/Documents/arrental_engine/arrental_engine/Images/character_mask.png";
 char* GRASS = "/Users/JJ/Documents/arrental_engine/arrental_engine/Images/basic_grass.png";
@@ -44,7 +52,7 @@ typedef struct
     Uint8 grass_img[SCREEN_WIDTH+32][SCREEN_HEIGHT+16];
 } grass_tiler;
 
-grass_tiler* grasstiler_create(AE_LinkedTexture* texture, Uint64 seed, Uint8 set)
+grass_tiler* grasstiler_create(AE_LinkedTexture* texture, uint64_t seed, Uint8 set)
 {
     grass_tiler* output = malloc(sizeof(grass_tiler));
     
@@ -70,7 +78,7 @@ grass_tiler* grasstiler_create(AE_LinkedTexture* texture, Uint64 seed, Uint8 set
     return output;
 }
 
-void grasstiler_retile(grass_tiler* tiler, Uint64 seed, Uint8 set)
+void grasstiler_retile(grass_tiler* tiler, uint64_t seed, Uint8 set)
 {
     //Set images to random grass
     for (int i = 0; i < SCREEN_WIDTH; i += 32)
@@ -122,7 +130,7 @@ typedef struct
     Uint8 world_img[SCREEN_WIDTH+5][SCREEN_HEIGHT+5];
 } world_tiler;
 
-world_tiler* worldtiler_create(AE_LinkedTexture* texture, Uint64 seed, Uint8 set)
+world_tiler* worldtiler_create(AE_LinkedTexture* texture, uint64_t seed, Uint8 set)
 {
     Uint8 temp = 0;
     world_tiler* output = malloc(sizeof(world_tiler));
@@ -146,7 +154,7 @@ world_tiler* worldtiler_create(AE_LinkedTexture* texture, Uint64 seed, Uint8 set
     return output;
 }
 
-void worldtiler_retile(world_tiler* tiler, Uint64 seed, Uint8 set)
+void worldtiler_retile(world_tiler* tiler, uint64_t seed, Uint8 set)
 {
     Uint8 temp = 0;
     //Set images to random grass
@@ -213,14 +221,28 @@ int main(int argc, const char* argv[])
         
         SDL_Event e;
         
-        AEC_Camera* camera = AEC_CameraCreate(0, 0, CAMERA_WIDTH, CAMERA_HEIGHT);
+        //SETTING UP THE VIEWPORTS
+        SDL_Rect viewports[PLAYER_COUNT];
+        unsigned int target_entities[PLAYER_COUNT];
+        for (int i = 0; i < PLAYER_COUNT; i++)
+        {
+            target_entities[i] = i;
+            viewports[i].x = 0;
+            viewports[i].y = i * (SCREEN_HEIGHT / PLAYER_COUNT);
+            viewports[i].w = SCREEN_WIDTH;
+            viewports[i].h = (SCREEN_HEIGHT / PLAYER_COUNT);
+        }
+        
+        //SETTING UP THE CAMERAS
+        
+        AEC_Camera* camera = AEC_Camera_CreateNew(0, 0, CAMERA_WIDTH, CAMERA_HEIGHT);
         SDL_Rect viewRect;
         viewRect.x = 0;
         viewRect.y = 0;
         viewRect.w = (int)camera->w;
         viewRect.h = (int)camera->h;
         
-        Uint64 seed = AE_RandomSeed();
+        uint64_t seed = AE_RandomSeed();
         Uint8 grass_set = 0;
         
         //Testing AEComponents
@@ -238,21 +260,21 @@ int main(int argc, const char* argv[])
         world_tiler* world_tiler = worldtiler_create(land_water, seed, grass_set);
         
         AEC_EntityCatalog* entityCatalog = malloc(sizeof(AEC_EntityCatalog));
-        AEC_SpriteBuffer* spriteBuffer = AEC_Create_SpriteBuffer();
+        AEC_SpriteBuffer* spriteBuffer = AEC_SpriteBuffer_CreateNew();
         
         for (int i = 0; i < TEST_CITIZEN_NUM; i++)
         {
-            AEC_CreateNewCharacter(entityCatalog, spriteSheet, char_mask);
+            AEC_Character_CreateNew(entityCatalog, spriteSheet, char_mask);
             entityCatalog->displacement[i].x = AE_Random(32, SCREEN_WIDTH-32);
             entityCatalog->displacement[i].y = AE_Random(32, SCREEN_HEIGHT-32);
         }
-        AEC_Entity_SetPlayable(entityCatalog, 1, true, 0);
+        AEC_PlayerControlled_SetPlayable(entityCatalog, 1, true, 0);
         SDL_Keycode keys[6] = {SDLK_w, SDLK_s, SDLK_a, SDLK_d, SDLK_f, SDLK_SPACE};
-        AEC_SetPlayerKeys(entityCatalog, 1, keys);
+        AEC_PlayerControlled_SetPlayerKeys(entityCatalog, 1, keys);
         
-        AEC_Entity_SetPlayable(entityCatalog, 2, true, 1);
+        AEC_PlayerControlled_SetPlayable(entityCatalog, 2, true, 1);
         SDL_Keycode keys_dual[6] = {SDLK_UP, SDLK_DOWN, SDLK_LEFT, SDLK_RIGHT, SDLK_f, SDLK_SPACE};
-        AEC_SetPlayerKeys(entityCatalog, 2, keys_dual);
+        AEC_PlayerControlled_SetPlayerKeys(entityCatalog, 2, keys_dual);
         
         if (SDL_NumJoysticks() > 0)
         {
@@ -260,12 +282,11 @@ int main(int argc, const char* argv[])
             entityCatalog->player_controlled[1].joystick_id = SDL_JoystickInstanceID(entityCatalog->player_controlled[1].joystick);
         }
         
-        AEC_CameraRefocus(entityCatalog, 1, camera);
-        
         AE_Timer* stepTimer = AE_Create_Timer();
         
         while (!quit)
         {
+            
             while (SDL_PollEvent(&e) != 0)
             {
                 if (e.type == SDL_QUIT)
@@ -297,8 +318,7 @@ int main(int argc, const char* argv[])
                     grasstiler_retile(tiler, seed, grass_set);
                     worldtiler_retile(world_tiler, seed, grass_set);
                 }
-                AEC_PlayerControlled_GetInput(entityCatalog, e);
-                AEC_VelocityUpdateSimple(entityCatalog);
+                AEC_Step_InputEvent(entityCatalog, e);
             }
             
             float time = AE_Timer_GetTime(stepTimer) / 1000.f;
@@ -307,34 +327,31 @@ int main(int argc, const char* argv[])
             SDL_SetRenderDrawColor(windowBundle->renderer, 0xFF, 0xFF, 0xFF, 0xFF);
             SDL_RenderClear(windowBundle->renderer);
             
-            grasstiler_render(tiler, windowBundle->renderer, time);
+            AEC_Step_TimeEvent(entityCatalog, time);
+            
             //worldtiler_render(world_tiler, windowBundle->renderer, time);
             
             SDL_RenderDrawRect(windowBundle->renderer, &viewRect);
             
-            AEC_DisplacementUpdate_ByVelocity(entityCatalog, time);
-            
-            //Refocus the camera before rendering
-            AEC_CameraRefocus(entityCatalog, 0, camera);
-            
-            if (AEC_Drawable_IsInCamera(entityCatalog, 1, camera))
+            //RENDER TO THE CAMERA
+            for (int i = 0; i < PLAYER_COUNT; i++)
             {
-                printf("Here!\n");
+                //Refocus the camera on the target entity before rendering
+                AEC_Camera_Refocus(entityCatalog, target_entities[i], camera);
+                
+                //Render the grass
+                
+                grasstiler_render(tiler, windowBundle->renderer, time);
+                
+                AEC_Render_CatalogToBuffer(entityCatalog, spriteBuffer);
+                AEC_Render_SpriteBuffer(spriteBuffer, entityCatalog, camera, windowBundle->renderer, time);
+                
+                SDL_RenderSetViewport( windowBundle->renderer, &viewports[i] );
             }
-            else
-            {
-                printf("\n");
-            }
-            
-            AEC_RenderCatalogToBuffer(entityCatalog, spriteBuffer);
-            AEC_RenderSpriteBuffer(spriteBuffer, entityCatalog, camera, windowBundle->renderer, time);
-            //AEC_Entities_Render(entityCatalog, windowBundle->renderer, time);
             
             AE_Timer_Start(stepTimer);
             
             SDL_RenderPresent(windowBundle->renderer);
-            
-            //AEC_FlushSpriteBuffer(spriteBuffer);
         }
         AE_DestroyLinkedTexture_Unsafe(spriteSheet);
     }
