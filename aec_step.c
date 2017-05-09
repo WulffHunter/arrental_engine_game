@@ -24,3 +24,15 @@ void AEC_Step_TimeEvent(AEC_EntityCatalog* entityCatalog, float step)
         AEC_Displacement_UpdateByVelocity(entityCatalog, entity_at, step);
     }
 }
+
+void AEC_Step_CameraEvent(AEC_EntityCatalog* entityCatalog, unsigned int entity_id, AEC_Camera* camera, float step)
+{
+    if (AEC_Entity_Exists(entityCatalog, entity_id))
+    {
+        if (camera->has_target)
+        {
+            AEC_Camera_Refocus(entityCatalog, entity_id - 1, camera);
+            AEC_Camera_ShakeUpdate(camera, step);
+        }
+    }
+}

@@ -18,4 +18,6 @@ void AEC_Step_InputEvent(AEC_EntityCatalog* entityCatalog, SDL_Event e);
 
 void AEC_Step_TimeEvent(AEC_EntityCatalog* entityCatalog, float step);
 
+void AEC_Step_CameraEvent(AEC_EntityCatalog* entityCatalog, unsigned int entity_id, AEC_Camera* camera, float step);
+
 #endif /* aec_step_h */

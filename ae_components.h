@@ -20,11 +20,16 @@
 //STRUCTS FOR GAMEPLAY
 //
 
+static const int AEC_CAMERA_SHAKE_MAX = 2;
+
 typedef struct {
     uint64_t x;
     uint64_t y;
     uint64_t w;
     uint64_t h;
+    float shake_length;
+    float shake_current_time;
+    SDL_bool has_target;
 } AEC_Camera;
 
 typedef struct {
@@ -228,6 +233,12 @@ uint64_t AEC_GetIsoDepth(AEC_EntityCatalog* entityCatalog, unsigned int entity_a
 AEC_Camera* AEC_Camera_CreateNew(uint64_t x, uint64_t y, uint64_t w, uint64_t h);
 
 void AEC_Camera_Refocus(AEC_EntityCatalog* entityCatalog, unsigned int target_entity, AEC_Camera* camera);
+
+void AEC_Camera_SetNewShake(AEC_Camera* camera, float shake_length);
+
+void AEC_Camera_ShakeUpdate(AEC_Camera* camera, float step);
+
+void AEC_Camera_HasTarget(AEC_Camera* camera, SDL_bool has_target);
 
 //
 //

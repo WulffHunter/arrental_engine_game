@@ -14,6 +14,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "aec_character_sprite.h"
 #include "aec_displacement.h"
@@ -37,8 +38,10 @@ const unsigned int TEST_CITIZEN_NUM = 100;
 
 char* CHAR_SHEET = "/Users/JJ/Documents/arrental_engine/arrental_engine/Images/character_spritesheet.png";
 char* CHAR_MASK = "/Users/JJ/Documents/arrental_engine/arrental_engine/Images/character_mask.png";
+char* SWORD_PIC = "/Users/JJ/Documents/arrental_engine/arrental_engine/Images/character_mask.png";
 char* GRASS = "/Users/JJ/Documents/arrental_engine/arrental_engine/Images/basic_grass.png";
 char* LAND_OR_WATER = "/Users/JJ/Documents/arrental_engine/arrental_engine/Images/land_and_water.png";
+char* CHAR_SHEET_ADDR = "Images/character_spritesheet.png";
 
 //
 //
@@ -236,6 +239,7 @@ int main(int argc, const char* argv[])
         //SETTING UP THE CAMERAS
         
         AEC_Camera* camera = AEC_Camera_CreateNew(0, 0, CAMERA_WIDTH, CAMERA_HEIGHT);
+        AEC_Camera_HasTarget(camera, SDL_TRUE);
         SDL_Rect viewRect;
         viewRect.x = 0;
         viewRect.y = 0;
@@ -318,6 +322,10 @@ int main(int argc, const char* argv[])
                     grasstiler_retile(tiler, seed, grass_set);
                     worldtiler_retile(world_tiler, seed, grass_set);
                 }
+                if (currentKeyStates[SDL_SCANCODE_R])
+                {
+                    AEC_Camera_SetNewShake(camera, 0.5);
+                }
                 AEC_Step_InputEvent(entityCatalog, e);
             }
             
@@ -337,7 +345,7 @@ int main(int argc, const char* argv[])
             for (int i = 0; i < PLAYER_COUNT; i++)
             {
                 //Refocus the camera on the target entity before rendering
-                AEC_Camera_Refocus(entityCatalog, target_entities[i], camera);
+                AEC_Step_CameraEvent(entityCatalog, target_entities[i] + 1, camera, time);
                 
                 //Render the grass
                 

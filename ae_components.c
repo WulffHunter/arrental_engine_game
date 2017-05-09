@@ -94,6 +94,31 @@ void AEC_Camera_Refocus(AEC_EntityCatalog* entityCatalog, unsigned int target_en
     }
 }
 
+void AEC_Camera_SetNewShake(AEC_Camera* camera, float shake_length)
+{
+    camera->shake_length = shake_length;
+    camera->shake_current_time = 0;
+}
+
+void AEC_Camera_ShakeUpdate(AEC_Camera* camera, float step)
+{
+    if (camera->shake_length > 0)
+    {
+        camera->shake_current_time += step;
+        camera->x += AE_Random(AEC_CAMERA_SHAKE_MAX * -1, AEC_CAMERA_SHAKE_MAX);
+        camera->y += AE_Random(AEC_CAMERA_SHAKE_MAX * -1, AEC_CAMERA_SHAKE_MAX);
+        if (camera->shake_current_time >= camera->shake_length)
+        {
+            AEC_Camera_SetNewShake(camera, 0);
+        }
+    }
+}
+
+void AEC_Camera_HasTarget(AEC_Camera* camera, SDL_bool has_target)
+{
+    camera->has_target = has_target;
+}
+
 //
 //
 //END: CAMERA FUNCTIONS
