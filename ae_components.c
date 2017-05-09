@@ -94,10 +94,11 @@ void AEC_Camera_Refocus(AEC_EntityCatalog* entityCatalog, unsigned int target_en
     }
 }
 
-void AEC_Camera_SetNewShake(AEC_Camera* camera, float shake_length)
+void AEC_Camera_SetNewShake(AEC_Camera* camera, float shake_length, float shake_amount)
 {
     camera->shake_length = shake_length;
     camera->shake_current_time = 0;
+    camera->shake_amount = shake_amount;
 }
 
 void AEC_Camera_ShakeUpdate(AEC_Camera* camera, float step)
@@ -105,11 +106,11 @@ void AEC_Camera_ShakeUpdate(AEC_Camera* camera, float step)
     if (camera->shake_length > 0)
     {
         camera->shake_current_time += step;
-        camera->x += AE_Random(AEC_CAMERA_SHAKE_MAX * -1, AEC_CAMERA_SHAKE_MAX);
-        camera->y += AE_Random(AEC_CAMERA_SHAKE_MAX * -1, AEC_CAMERA_SHAKE_MAX);
+        camera->x += AE_Random(camera->shake_amount * -1, camera->shake_amount);
+        camera->y += AE_Random(camera->shake_amount * -1, camera->shake_amount);
         if (camera->shake_current_time >= camera->shake_length)
         {
-            AEC_Camera_SetNewShake(camera, 0);
+            AEC_Camera_SetNewShake(camera, 0, 0);
         }
     }
 }
