@@ -42,7 +42,8 @@ typedef struct {
 
 static const unsigned int AEC_COMPONENT_COUNT = 9;
 static const unsigned int AEC_ENTITY_COUNT = 1000;
-static const unsigned int AEC_ENTITY_SPRITE_ALLOWANCE = 100;
+static const unsigned int AEC_INVENTORY_MAX = 1000;
+static const unsigned int AEC_INVENTORY_CATEGORY_COUNT = 5;
 
 typedef enum {
     AEC_DISPLACEMENT,
@@ -82,7 +83,15 @@ typedef enum {
     AEC_WEPTYPE_BOW,
     AEC_WEPTYPE_MAGIC,
     AEC_WEPTYPE_POLEARM
-} AEC_WeaponTypes;
+} AEC_WeaponType;
+
+typedef enum {
+    AEC_INVTYPE_WEAPON,
+    AEC_INVTYPE_ARMOR,
+    AEC_INVTYPE_HELM,
+    AEC_INVTYPE_MISC,
+    AEC_INVTYPE_ARROW
+} AEC_InventoryType;
 
 //
 //ESSENTIAL VARIABLE: THE NUMBER OF AVAILIBLE COMPONENTS AND ENTITIES
@@ -151,8 +160,17 @@ typedef struct {
 } NPC_MOVEMENT_AI;
 
 typedef struct {
+    unsigned int items[AEC_INVENTORY_CATEGORY_COUNT][AEC_INVENTORY_MAX];
+    unsigned int item_count[AEC_INVENTORY_CATEGORY_COUNT];
+    unsigned int equipped[AEC_INVENTORY_CATEGORY_COUNT];
+} INVENTORY;
+
+typedef struct {
     unsigned int weapon_type;
     SDL_bool is_in_use;
+    float weapon_angle;
+    uint64_t x_distance;
+    uint64_t y_distance;
 } WEAPON;
 
 //
@@ -170,6 +188,7 @@ typedef struct {
     TRAIL trail[AEC_ENTITY_COUNT];
     PLAYER_CONTROLLED player_controlled[AEC_ENTITY_COUNT];
     NPC_MOVEMENT_AI npc_movement_ai[AEC_ENTITY_COUNT];
+    INVENTORY inventory[AEC_ENTITY_COUNT];
     WEAPON weapon[AEC_ENTITY_COUNT];
 } AEC_EntityCatalog;
 
@@ -189,6 +208,12 @@ static const unsigned int AEC_CHARACTER_DOWN_FROM_BASE = 2;
 static const unsigned int AEC_CHARACTER_X_CONSTANT = 2;
 static const unsigned int AEC_CHARACTER_Y_CONSTANT = 2;
 static const int DEAD_ZONE = 8000;
+
+unsigned int AEC_Entity_CreateNew(AEC_EntityCatalog* entityCatalog);
+
+SDL_bool AEC_Entity_Exists(AEC_EntityCatalog* entityCatalog, unsigned int entity_id);
+
+SDL_bool AEC_Entity_IsFilled(AEC_EntityCatalog* entityCatalog, unsigned int entity_id);
 
 AE_ColorBundle* AEC_GetRandomSkinColor();
 

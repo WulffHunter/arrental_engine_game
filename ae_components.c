@@ -14,6 +14,25 @@
 #include <stdio.h>
 #include <string.h>
 
+unsigned int AEC_Entity_CreateNew(AEC_EntityCatalog* entityCatalog)
+{
+    int entity_at = 0;
+    while (entityCatalog->entity_id[entity_at] != 0)
+    {
+        entity_at++;
+    }
+    if (entity_at < AEC_ENTITY_COUNT)
+    {
+        return entity_at + 1;
+    }
+    return 0;
+}
+
+SDL_bool AEC_Entity_Exists(AEC_EntityCatalog* entityCatalog, unsigned int entity_id)
+{
+    return (entity_id > 0 && entityCatalog->entity_id[entity_id - 1] != 0);
+}
+
 uint64_t AEC_GetIsoDepth(AEC_EntityCatalog* entityCatalog, unsigned int entity_at)
 {
     if (entityCatalog->entity_components[entity_at].component_mask[AEC_DISPLACEMENT])
