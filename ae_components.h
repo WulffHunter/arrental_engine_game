@@ -173,10 +173,13 @@ typedef struct {
 
 typedef struct {
     unsigned int weapon_type;
+    SDL_bool activated;
     SDL_bool is_in_use;
     float weapon_angle;
     uint64_t x_distance;
     uint64_t y_distance;
+    float weapon_clock_length;
+    float weapon_current_time;
 } WEAPON;
 
 //

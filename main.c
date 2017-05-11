@@ -35,8 +35,8 @@ const uint64_t CAMERA_WIDTH = SCREEN_WIDTH;
 const uint64_t CAMERA_HEIGHT = SCREEN_HEIGHT / PLAYER_COUNT;
 const int JOYSTICK_DEAD_ZONE = 8000;
 const unsigned int TEST_CITIZEN_NUM = 100;
-const float SCREENSHAKE_LENGTH = 0.2;
-const float SCREENSHAKE_AMOUNT = 4;
+const float SCREENSHAKE_LENGTH = 1;
+const float SCREENSHAKE_AMOUNT = 3;
 
 char* CHAR_SHEET = "/Users/JJ/Documents/arrental_engine/arrental_engine/Images/character_spritesheet.png";
 char* CHAR_MASK = "/Users/JJ/Documents/arrental_engine/arrental_engine/Images/character_mask.png";

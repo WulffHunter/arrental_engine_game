@@ -10,6 +10,7 @@
 #define aec_player_controlled_h
 
 #include "ae_components.h"
+#include "aec_weapon.h"
 
 void AEC_PlayerControlled_GetInput(AEC_EntityCatalog* entityCatalog, unsigned int entity_at, SDL_Event event);
 

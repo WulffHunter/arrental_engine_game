@@ -12,8 +12,11 @@ void AEC_Step_InputEvent(AEC_EntityCatalog* entityCatalog, SDL_Event event)
 {
     for (int entity_at = 0; entity_at < AEC_ENTITY_COUNT; entity_at++)
     {
-        AEC_PlayerControlled_GetInput(entityCatalog, entity_at, event);
-        AEC_Velocity_UpdateSimple(entityCatalog, entity_at);
+        if (entityCatalog->entity_id[entity_at] > 0)
+        {
+            AEC_PlayerControlled_GetInput(entityCatalog, entity_at, event);
+            AEC_Velocity_UpdateSimple(entityCatalog, entity_at);
+        }
     }
 }
 
@@ -21,7 +24,10 @@ void AEC_Step_TimeEvent(AEC_EntityCatalog* entityCatalog, float step)
 {
     for (int entity_at = 0; entity_at < AEC_ENTITY_COUNT; entity_at++)
     {
-        AEC_Displacement_UpdateByVelocity(entityCatalog, entity_at, step);
+        if (entityCatalog->entity_id[entity_at] > 0)
+        {
+            AEC_Displacement_UpdateByVelocity(entityCatalog, entity_at, step);
+        }
     }
 }
 

@@ -32,6 +32,10 @@ void AEC_PlayerControlled_GetInput(AEC_EntityCatalog* entityCatalog, unsigned in
                 {
                     entityCatalog->velocity[entity_at].direction_on[AEC_KEY_RIGHT] = SDL_TRUE;
                 }
+                if (event.key.keysym.sym == entityCatalog->player_controlled[entity_at].key_binds[AEC_KEY_ATTACK])
+                {
+                    AEC_Weapon_Activate(entityCatalog, entity_at);
+                }
             }
             if (event.type == SDL_KEYUP && event.key.repeat == 0)
             {

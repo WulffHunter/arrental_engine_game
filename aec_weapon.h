@@ -11,8 +11,16 @@
 
 #include "ae_components.h"
 
-int AEC_Weapon_CreateNew(AEC_EntityCatalog* entityCatalog);
+int AEC_Weapon_CreateNew(AEC_EntityCatalog* entityCatalog, unsigned int entity_id);
 
-SDL_bool AEC_Weapon_IsInInventory(unsigned int weapon_id);
+int AEC_Weapon_GetWeaponType(AEC_EntityCatalog* entityCatalog, unsigned int entity_id);
+
+float AEC_Weapon_GetClockLength(AEC_EntityCatalog* entityCatalog, unsigned int entity_id);
+
+void AEC_Weapon_Activate(AEC_EntityCatalog* entityCatalog, unsigned int entity_id);
+
+void AEC_Weapon_Step(AEC_EntityCatalog* entityCatalog, unsigned int entity_at, float step);
+
+void AEC_Weapon_SwordRotate(AEC_EntityCatalog* entityCatalog, unsigned int entity_at);
 
 #endif /* aec_weapon_h */
