@@ -83,8 +83,24 @@ void AEC_Velocity_UpdateSimple(AEC_EntityCatalog* entityCatalog, unsigned int en
             }
             if (!moving)
             {
-                xVel = 0;
-                yVel = 0;
+                xVel = yVel = 0;
+                
+                /*if (yVel < 0)
+                {
+                    yVel += accel_yVel;
+                }
+                else if (yVel > 0)
+                {
+                    yVel -= accel_yVel;
+                }
+                if (xVel < 0)
+                {
+                    xVel += accel_xVel;
+                }
+                else if (xVel > 0)
+                {
+                    xVel -= accel_xVel;
+                }*/
             }
             if (moving)
             {

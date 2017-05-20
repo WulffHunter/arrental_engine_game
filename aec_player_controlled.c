@@ -117,8 +117,11 @@ void AEC_PlayerControlled_GetInput(AEC_EntityCatalog* entityCatalog, unsigned in
                     
                     //printf("Currently at: %f, %f: %f\n", axis_x,axis_y, AE_VectorLength(axis_x, axis_y));
                     
-                    double pi_over_three_x = (1 / 2);
-                    double pi_over_three_y = (pow(3, (1 / 2)) / 2);
+                    //double pi_over_three_x = (1 / 2);
+                    //double pi_over_three_y = (sqrt(3) / 2);
+                    
+                    double pi_over_three_x = (sqrt(2) / 2);
+                    double pi_over_three_y = (sqrt(2) / 2);
                     
                     //If the axis is moved to the left
                     if (!AE_VectorIsClockwise(axis_x, axis_y, -1 * pi_over_three_x, pi_over_three_y) && AE_VectorIsClockwise(axis_x, axis_y, -1 * pi_over_three_x, -1 * pi_over_three_y) && (AE_VectorLength(axis_x, axis_y) > DEAD_ZONE))

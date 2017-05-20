@@ -14,7 +14,7 @@
 #include "aec_mask.h"
 
 const static float AEC_CHARACTER_VELOCITY_MAX = 80;
-const static float AEC_CHARACTER_VELOCITY_ACCEL = AEC_CHARACTER_VELOCITY_MAX / 3;
+const static float AEC_CHARACTER_VELOCITY_ACCEL = AEC_CHARACTER_VELOCITY_MAX / 8;
 
 unsigned int AEC_Character_CreateNew(AEC_EntityCatalog* entityCatalog, AE_LinkedTexture* characterSpriteSheet, AE_LinkedTexture* maskSpriteSheet);
 
