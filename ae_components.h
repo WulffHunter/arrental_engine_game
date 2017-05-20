@@ -124,9 +124,10 @@ typedef struct {
     SDL_bool direction_on[4];
     SDL_bool just_started_moving;
     SDL_bool moving;
-    int max_vel;
-    int xVel;
-    int yVel;
+    float accel_vel;
+    float max_vel;
+    float xVel;
+    float yVel;
 } VELOCITY;
 
 typedef struct {
@@ -154,6 +155,8 @@ typedef struct {
     SDL_Joystick* joystick;
     Uint8 joystick_id;
     SDL_GameController* controller;
+    Sint16 jaxis_x;
+    Sint16 jaxis_y;
     SDL_Keycode key_binds[6];
 } PLAYER_CONTROLLED;
 

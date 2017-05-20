@@ -23,6 +23,7 @@ unsigned int AEC_Entity_CreateNew(AEC_EntityCatalog* entityCatalog)
     }
     if (entity_at < AEC_ENTITY_COUNT)
     {
+        entityCatalog->entity_id[entity_at] = entity_at + 1;
         return entity_at + 1;
     }
     return 0;

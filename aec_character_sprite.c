@@ -8,55 +8,50 @@
 
 #include "aec_character_sprite.h"
 
-SDL_bool AEC_CharacterSprite_CreateNew(int entity_id, AEC_EntityCatalog* entityCatalog, AE_LinkedTexture* characterSpriteSheet)
+SDL_bool AEC_CharacterSprite_CreateNew(AEC_EntityCatalog* entityCatalog, int entity_id, AE_LinkedTexture* characterSpriteSheet)
 {
-    SDL_bool success = SDL_FALSE;
-    for (int search = 0; search < AEC_ENTITY_COUNT; search++)
+    if (AEC_Entity_Exists(entityCatalog, entity_id))
     {
-        if (entityCatalog->entity_id[search] == entity_id)
+        //Set the components catalog to show that the entity has a charactersprite
+        entityCatalog->entity_components[entity_id - 1].component_mask[AEC_CHARACTER_SPRITE] = SDL_TRUE;
+        
+        //Fill the list of character bodypart sprites
+        
+        AE_FillSprite(&entityCatalog->character_sprite[entity_id - 1].bodySprites[AEC_TORSO], characterSpriteSheet, 0, 0, 1, 32, 32, 32/2, 32/2);
+        AE_FillSprite(&entityCatalog->character_sprite[entity_id - 1].bodySprites[AEC_CHEST], characterSpriteSheet, 0, 64, 2, 32, 32, 32/2, 32/2);
+        AE_FillSprite(&entityCatalog->character_sprite[entity_id - 1].bodySprites[AEC_LEG_LEFT], characterSpriteSheet, 32, 0, 1, 32, 32, 32/2, 32/2);
+        AE_FillSprite(&entityCatalog->character_sprite[entity_id - 1].bodySprites[AEC_LEG_RIGHT], characterSpriteSheet, 0, 32, 1, 32, 32, 32/2, 32/2);
+        
+        //Set the skin color to a random color
+        AE_ColorBundle* skinColor = AEC_GetRandomSkinColor();
+        AE_SpriteSetColor(&entityCatalog->character_sprite[entity_id - 1].bodySprites[AEC_TORSO], skinColor, AE_SPRITE_KEEP_NONE);
+        AE_SpriteSetColor(&entityCatalog->character_sprite[entity_id - 1].bodySprites[AEC_CHEST], skinColor, AE_SPRITE_KEEP_NONE);
+        AE_SpriteSetColor(&entityCatalog->character_sprite[entity_id - 1].bodySprites[AEC_LEG_LEFT], skinColor, AE_SPRITE_KEEP_NONE);
+        AE_SpriteSetColor(&entityCatalog->character_sprite[entity_id - 1].bodySprites[AEC_LEG_RIGHT], skinColor, AE_SPRITE_KEEP_NONE);
+        
+        free(skinColor);
+        
+        entityCatalog->character_sprite[entity_id - 1].draw_part[AEC_LEG_RIGHT] = SDL_TRUE;
+        entityCatalog->character_sprite[entity_id - 1].draw_part[AEC_LEG_LEFT] = SDL_TRUE;
+        entityCatalog->character_sprite[entity_id - 1].draw_part[AEC_TORSO] = SDL_TRUE;
+        entityCatalog->character_sprite[entity_id - 1].draw_part[AEC_CHEST] = SDL_TRUE;
+        
+        //Set random gender
+        int_least8_t gender = (int_least8_t )AE_Random(0, 4);
+        
+        if (gender >= 3)
         {
-            //Set the components catalog to show that the entity has a charactersprite
-            entityCatalog->entity_components[search].component_mask[AEC_CHARACTER_SPRITE] = SDL_TRUE;
-            
-            //Fill the list of character bodypart sprites
-            
-            AE_FillSprite(&entityCatalog->character_sprite[search].bodySprites[AEC_TORSO], characterSpriteSheet, 0, 0, 1, 32, 32, 32/2, 32/2);
-            AE_FillSprite(&entityCatalog->character_sprite[search].bodySprites[AEC_CHEST], characterSpriteSheet, 0, 64, 2, 32, 32, 32/2, 32/2);
-            AE_FillSprite(&entityCatalog->character_sprite[search].bodySprites[AEC_LEG_LEFT], characterSpriteSheet, 32, 0, 1, 32, 32, 32/2, 32/2);
-            AE_FillSprite(&entityCatalog->character_sprite[search].bodySprites[AEC_LEG_RIGHT], characterSpriteSheet, 0, 32, 1, 32, 32, 32/2, 32/2);
-            
-            //Set the skin color to a random color
-            AE_ColorBundle* skinColor = AEC_GetRandomSkinColor();
-            AE_SpriteSetColor(&entityCatalog->character_sprite[search].bodySprites[AEC_TORSO], skinColor, AE_SPRITE_KEEP_NONE);
-            AE_SpriteSetColor(&entityCatalog->character_sprite[search].bodySprites[AEC_CHEST], skinColor, AE_SPRITE_KEEP_NONE);
-            AE_SpriteSetColor(&entityCatalog->character_sprite[search].bodySprites[AEC_LEG_LEFT], skinColor, AE_SPRITE_KEEP_NONE);
-            AE_SpriteSetColor(&entityCatalog->character_sprite[search].bodySprites[AEC_LEG_RIGHT], skinColor, AE_SPRITE_KEEP_NONE);
-            
-            free(skinColor);
-            
-            entityCatalog->character_sprite[search].draw_part[AEC_LEG_RIGHT] = SDL_TRUE;
-            entityCatalog->character_sprite[search].draw_part[AEC_LEG_LEFT] = SDL_TRUE;
-            entityCatalog->character_sprite[search].draw_part[AEC_TORSO] = SDL_TRUE;
-            entityCatalog->character_sprite[search].draw_part[AEC_CHEST] = SDL_TRUE;
-            
-            //Set random gender
-            int_least8_t gender = (int_least8_t )AE_Random(0, 4);
-            
-            if (gender >= 3)
-            {
-                entityCatalog->character_sprite[search].gender = AEC_FEMALE;
-            }
-            else
-            {
-                entityCatalog->character_sprite[search].gender = AEC_MALE;
-            }
-            entityCatalog->character_sprite[search].x_scale = 1;
-            entityCatalog->character_sprite[search].y_scale = 1;
-            entityCatalog->velocity[search].max_vel = 50;
-            entityCatalog->character_sprite[search].leg_movement_time = 0.15;
+            entityCatalog->character_sprite[entity_id - 1].gender = AEC_FEMALE;
         }
+        else
+        {
+            entityCatalog->character_sprite[entity_id - 1].gender = AEC_MALE;
+        }
+        entityCatalog->character_sprite[entity_id - 1].x_scale = 1;
+        entityCatalog->character_sprite[entity_id - 1].y_scale = 1;
+        entityCatalog->character_sprite[entity_id - 1].leg_movement_time = 0.15;
     }
-    return success;
+    return SDL_FALSE;
 }
 
 void AEC_CharacterSprite_SetFlip(CHARACTER_SPRITE* characterSprite, SDL_RendererFlip flip)

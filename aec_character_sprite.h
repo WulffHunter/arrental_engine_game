@@ -11,7 +11,7 @@
 
 #include "ae_components.h"
 
-SDL_bool AEC_CharacterSprite_CreateNew(int entity_id, AEC_EntityCatalog* entityCatalog, AE_LinkedTexture* characterSpriteSheet);
+SDL_bool AEC_CharacterSprite_CreateNew(AEC_EntityCatalog* entityCatalog, int entity_id, AE_LinkedTexture* characterSpriteSheet);
 
 void AEC_CharacterSprite_SetFlip(CHARACTER_SPRITE* characterSprite, SDL_RendererFlip flip);
 

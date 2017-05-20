@@ -14,8 +14,6 @@ unsigned int AEC_Character_CreateNew(AEC_EntityCatalog* entityCatalog, AE_Linked
     int entity_at = AEC_Entity_CreateNew(entityCatalog);
     if (entity_at > 0)
     {
-        entityCatalog->entity_id[entity_at - 1] = entity_at;
-        
         //Set all the necessary components to SDL_TRUE
         entityCatalog->entity_components[entity_at - 1].component_mask[AEC_DISPLACEMENT] = SDL_TRUE;
         entityCatalog->entity_components[entity_at - 1].component_mask[AEC_DRAWABLE] = SDL_TRUE;
@@ -25,10 +23,13 @@ unsigned int AEC_Character_CreateNew(AEC_EntityCatalog* entityCatalog, AE_Linked
         entityCatalog->entity_components[entity_at - 1].component_mask[AEC_TRAIL] = SDL_TRUE;
         
         //Character is an NPC by default
-        entityCatalog->entity_components[entity_at].component_mask[AEC_NPC_MOVEMENT_AI] = SDL_TRUE;
+        entityCatalog->entity_components[entity_at - 1].component_mask[AEC_NPC_MOVEMENT_AI] = SDL_TRUE;
         
-        AEC_CharacterSprite_CreateNew(entity_at, entityCatalog, characterSpriteSheet);
-        AEC_Mask_CreateNew(entity_at, entityCatalog, maskSpriteSheet);
+        AEC_CharacterSprite_CreateNew(entityCatalog, entity_at, characterSpriteSheet);
+        AEC_Mask_CreateNew(entityCatalog, entity_at, maskSpriteSheet);
+        
+        entityCatalog->velocity[entity_at - 1].accel_vel = AEC_CHARACTER_VELOCITY_ACCEL;
+        entityCatalog->velocity[entity_at - 1].max_vel = AEC_CHARACTER_VELOCITY_MAX;
         
         //TESTING CODE!!!
         entityCatalog->drawable[entity_at - 1].width = AEC_CHARACTER_WIDTH;

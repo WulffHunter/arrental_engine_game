@@ -639,6 +639,26 @@ long double AE_Lengthdir_X(int length, float direction);
  */
 long double AE_Lengthdir_Y(int length, float direction);
 
+/**
+ Returns whether a vector belonging to a point (x1, y1) is clockwise to a vector belonging to another point (x2, y2)
+
+ @param x1 The horizontal value of the point on a vector being tested
+ @param y1 The vertical value of the point on a vector being tested
+ @param x2 The horizontal value of the point on a vector
+ @param y2 The vertical value of the point on a vector
+ @return Whether vector (x1, y1) is clockwise to (x2, y2)
+ */
+SDL_bool AE_VectorIsClockwise(double x1, double y1, double x2, double y2);
+
+/**
+ Returns the length of a vector designated by the endpoint
+ 
+ @param x The horizontal distance of the point from the center
+ @param y The vertical distance of the point from the center
+ @return The length of the vector designated by the x and y
+ */
+double AE_VectorLength(double x, double y);
+
 //
 //
 //End: General Functions

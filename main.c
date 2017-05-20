@@ -35,8 +35,8 @@ const uint64_t CAMERA_WIDTH = SCREEN_WIDTH;
 const uint64_t CAMERA_HEIGHT = SCREEN_HEIGHT / PLAYER_COUNT;
 const int JOYSTICK_DEAD_ZONE = 8000;
 const unsigned int TEST_CITIZEN_NUM = 100;
-const float SCREENSHAKE_LENGTH = 1;
-const float SCREENSHAKE_AMOUNT = 3;
+const float SCREENSHAKE_LENGTH = 0.2;
+const float SCREENSHAKE_AMOUNT = 2;
 
 char* CHAR_SHEET = "/Users/JJ/Documents/arrental_engine/arrental_engine/Images/character_spritesheet.png";
 char* CHAR_MASK = "/Users/JJ/Documents/arrental_engine/arrental_engine/Images/character_mask.png";
@@ -56,6 +56,11 @@ typedef struct
     AE_Sprite* sprite;
     Uint8 grass_img[SCREEN_WIDTH+32][SCREEN_HEIGHT+16];
 } grass_tiler;
+
+typedef struct
+{
+    AE_Sprite* sprite;
+} gtv2;
 
 grass_tiler* grasstiler_create(AE_LinkedTexture* texture, uint64_t seed, Uint8 set)
 {
@@ -119,6 +124,20 @@ void grasstiler_render(grass_tiler* tiler, SDL_Renderer* renderer, float step)
         for (int j = -8; j < SCREEN_HEIGHT; j += 16)
         {
             AE_SpriteRender(grass_sprite, renderer, i, j, tiler->grass_img[i+16][j+8], step);
+        }
+    }
+}
+
+void tile_render(AE_Sprite* sprite, AEC_Camera* camera, uint64_t seed, Uint8 set, SDL_Renderer* renderer, float step)
+{
+    for (int grid_pass = 0; grid_pass <= (sprite->width / 4); grid_pass += (sprite->width / 4))
+    {
+        for (int i = -(sprite->width) - (grid_pass * 2); i < (int)camera->w + (sprite->width); i += (sprite->width))
+        {
+            for (int j = -(sprite->height) - grid_pass; j < (int)camera->h + (sprite->height); j += (sprite->height))
+            {
+                AE_SpriteRender(sprite, renderer, (sprite->width) - (int)(camera->x % (sprite->width)) + i, (sprite->height) - (int)(camera->y % (sprite->height)) + j, AE_PseudoRandomFromSeed_Uint64(seed, (uint64_t)(((camera->x - (sprite->width) - (camera->x % (sprite->width)))) + i), (uint64_t)(((camera->y - (sprite->height) - (camera->y % (sprite->height)))) + j), (Uint64)set, 0, 20), step);
+            }
         }
     }
 }
@@ -255,15 +274,16 @@ int main(int argc, const char* argv[])
         SDL_Texture* spriteSheetTexture = AE_LoadTextureFromFile(windowBundle->renderer, CHAR_SHEET);
         SDL_Texture* maskTexture = AE_LoadTextureFromFile(windowBundle->renderer, CHAR_MASK);
         SDL_Texture* grassTexture = AE_LoadTextureFromFile(windowBundle->renderer, GRASS);
-        SDL_Texture* lowTexture = AE_LoadTextureFromFile(windowBundle->renderer, LAND_OR_WATER);
+        //SDL_Texture* lowTexture = AE_LoadTextureFromFile(windowBundle->renderer, LAND_OR_WATER);
         
         AE_LinkedTexture* spriteSheet = AE_CreateLinkedTexture(spriteSheetTexture);
         AE_LinkedTexture* char_mask = AE_CreateLinkedTexture(maskTexture);
         AE_LinkedTexture* grassLinked = AE_CreateLinkedTexture(grassTexture);
-        AE_LinkedTexture* land_water = AE_CreateLinkedTexture(lowTexture);
+        //AE_LinkedTexture* land_water = AE_CreateLinkedTexture(lowTexture);
         
-        grass_tiler* tiler = grasstiler_create(grassLinked, seed, grass_set);
-        world_tiler* world_tiler = worldtiler_create(land_water, seed, grass_set);
+        //grass_tiler* tiler = grasstiler_create(grassLinked, seed, grass_set);
+        AE_Sprite* tile_sprite = AE_CreateSprite(grassLinked, 0, 0, 20, 32, 16, 0, 0);
+        //world_tiler* world_tiler = worldtiler_create(land_water, seed, grass_set);
         
         AEC_EntityCatalog* entityCatalog = malloc(sizeof(AEC_EntityCatalog));
         AEC_SpriteBuffer* spriteBuffer = AEC_SpriteBuffer_CreateNew();
@@ -309,8 +329,8 @@ int main(int argc, const char* argv[])
                     }
                     //seed = AE_RandomSeed();
                     grass_set++;
-                    grasstiler_retile(tiler, seed, grass_set);
-                    worldtiler_retile(world_tiler, seed, grass_set);
+                    //grasstiler_retile(tiler, seed, grass_set);
+                    //worldtiler_retile(world_tiler, seed, grass_set);
                 }
                 if (currentKeyStates[SDL_SCANCODE_E])
                 {
@@ -321,8 +341,8 @@ int main(int argc, const char* argv[])
                     }
                     //seed = AE_RandomSeed();
                     grass_set--;
-                    grasstiler_retile(tiler, seed, grass_set);
-                    worldtiler_retile(world_tiler, seed, grass_set);
+                    //grasstiler_retile(tiler, seed, grass_set);
+                    //worldtiler_retile(world_tiler, seed, grass_set);
                 }
                 if (currentKeyStates[SDL_SCANCODE_R])
                 {
@@ -351,7 +371,8 @@ int main(int argc, const char* argv[])
                 
                 //Render the grass
                 
-                grasstiler_render(tiler, windowBundle->renderer, time);
+                //grasstiler_render(tiler, windowBundle->renderer, time);
+                tile_render(tile_sprite, camera, seed, grass_set, windowBundle->renderer, time);
                 
                 AEC_Render_CatalogToBuffer(entityCatalog, spriteBuffer);
                 AEC_Render_SpriteBuffer(spriteBuffer, entityCatalog, camera, windowBundle->renderer, time);

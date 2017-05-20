@@ -11,7 +11,7 @@
 
 #include "ae_components.h"
 
-SDL_bool AEC_Mask_CreateNew(int entity_id, AEC_EntityCatalog* entityCatalog, AE_LinkedTexture* maskSpriteSheet);
+SDL_bool AEC_Mask_CreateNew(AEC_EntityCatalog* entityCatalog, int entity_id, AE_LinkedTexture* maskSpriteSheet);
 
 void AEC_Mask_Render(MASK* mask, DISPLACEMENT* displacement, float x_scale, float y_scale, AEC_Camera* camera, SDL_Renderer* renderer, float step);
 
