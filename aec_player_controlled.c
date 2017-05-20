@@ -115,13 +115,13 @@ void AEC_PlayerControlled_GetInput(AEC_EntityCatalog* entityCatalog, unsigned in
                         axis_y = entityCatalog->player_controlled[entity_at].jaxis_y = event.jaxis.value;
                     }
                     
-                    printf("Currently at: %f, %f: %f\n", axis_x,axis_y, AE_VectorLength(axis_x, axis_y));
+                    //printf("Currently at: %f, %f: %f\n", axis_x,axis_y, AE_VectorLength(axis_x, axis_y));
                     
                     double pi_over_three_x = (1 / 2);
                     double pi_over_three_y = (pow(3, (1 / 2)) / 2);
                     
                     //If the axis is moved to the left
-                    if (AE_VectorIsClockwise(axis_x, axis_y, -1 * pi_over_three_x, pi_over_three_y) && !AE_VectorIsClockwise(axis_x, axis_y, -1 * pi_over_three_x, -1 * pi_over_three_y) && (AE_VectorLength(axis_x, axis_y) > DEAD_ZONE))
+                    if (!AE_VectorIsClockwise(axis_x, axis_y, -1 * pi_over_three_x, pi_over_three_y) && AE_VectorIsClockwise(axis_x, axis_y, -1 * pi_over_three_x, -1 * pi_over_three_y) && (AE_VectorLength(axis_x, axis_y) > DEAD_ZONE))
                     {
                         entityCatalog->velocity[entity_at].direction_on[AEC_KEY_LEFT] = SDL_TRUE;
                     }
