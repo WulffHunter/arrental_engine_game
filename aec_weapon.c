@@ -12,8 +12,8 @@ int AEC_Weapon_CreateNew(AEC_EntityCatalog* entityCatalog, unsigned int entity_i
 {
     if (AEC_Entity_Exists(entityCatalog, entity_id))
     {
-        entityCatalog->weapon[entity_id - 1].activated = SDL_FALSE;
-        entityCatalog->weapon[entity_id - 1].is_in_use = SDL_FALSE;
+        /*entityCatalog->weapon[entity_id - 1].activated = SDL_FALSE;
+        entityCatalog->weapon[entity_id - 1].is_in_use = SDL_FALSE;*/
     }
     return 0;
 }
@@ -50,13 +50,13 @@ void AEC_Weapon_Activate(AEC_EntityCatalog* entityCatalog, unsigned int entity_i
 {
     if (AEC_Entity_Exists(entityCatalog, entity_id))
     {
-        entityCatalog->weapon[entity_id - 1].activated = SDL_TRUE;
+        //entityCatalog->weapon[entity_id - 1].activated = SDL_TRUE;
     }
 }
 
 void AEC_Weapon_Step(AEC_EntityCatalog* entityCatalog, unsigned int entity_at, float step)
 {
-    if (entityCatalog->weapon[entity_at].activated)
+    /*if (entityCatalog->aggressive[entity_at].attacking)
     {
         entityCatalog->weapon[entity_at].activated = SDL_FALSE;
         if (!entityCatalog->weapon[entity_at].is_in_use)
@@ -76,7 +76,7 @@ void AEC_Weapon_Step(AEC_EntityCatalog* entityCatalog, unsigned int entity_at, f
             entityCatalog->weapon[entity_at].weapon_current_time = 0;
             entityCatalog->weapon[entity_at].weapon_clock_length = 0;
         }
-    }
+    }*/
 }
 
 void AEC_Weapon_SwordRotate(AEC_EntityCatalog* entityCatalog, unsigned int entity_id);

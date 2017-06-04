@@ -46,7 +46,7 @@ typedef struct {
 //ESSENTIAL VARIABLE: THE NUMBER OF AVAILIBLE COMPONENTS AND ENTITIES
 //
 
-static const unsigned int AEC_COMPONENT_COUNT = 9;
+static const unsigned int AEC_COMPONENT_COUNT = 10;
 static const unsigned int AEC_ENTITY_COUNT = 1000;
 static const unsigned int AEC_INVENTORY_MAX = 1000;
 static const unsigned int AEC_INVENTORY_CATEGORY_COUNT = 5;
@@ -55,6 +55,7 @@ typedef enum {
     AEC_DISPLACEMENT,
     AEC_DRAWABLE,
     AEC_VELOCITY,
+    AEC_AGGRESSIVE,
     AEC_MASK,
     AEC_CHARACTER_SPRITE,
     AEC_TRAIL,
@@ -66,7 +67,8 @@ typedef enum {
     AEC_TORSO,
     AEC_CHEST,
     AEC_LEG_LEFT,
-    AEC_LEG_RIGHT
+    AEC_LEG_RIGHT,
+    AEC_FACE
 } AEC_CharacterSpriteParts;
 
 typedef enum {
@@ -98,6 +100,12 @@ typedef enum {
     AEC_INVTYPE_MISC,
     AEC_INVTYPE_ARROW
 } AEC_InventoryType;
+
+typedef enum {
+    AEC_AGGR_TYPE_NONE,
+    AEC_AGGR_TYPE_WEAPON,
+    AEC_AGGR_TYPE_MONSTER
+} AEC_AggressiveAttackMethod;
 
 //
 //ESSENTIAL VARIABLE: THE NUMBER OF AVAILIBLE COMPONENTS AND ENTITIES
@@ -131,12 +139,18 @@ typedef struct {
 } VELOCITY;
 
 typedef struct {
+    SDL_bool attack_activate;
+    SDL_bool is_attacking;
+    Uint8 attack_method;
+} AGGRESSIVE;
+
+typedef struct {
     AE_Sprite sprite;
 } MASK;
 
 typedef struct {
-    AE_Sprite bodySprites[4];
-    SDL_bool draw_part[4];
+    AE_Sprite bodySprites[5];
+    SDL_bool draw_part[5];
     int distance_from_base;
     int_least8_t gender;
     SDL_bool leg_in;
@@ -144,6 +158,8 @@ typedef struct {
     float leg_clock;
     float x_scale;
     float y_scale;
+    unsigned int face;
+    unsigned int target_entity_id;
 } CHARACTER_SPRITE;
 
 typedef struct {
@@ -176,8 +192,6 @@ typedef struct {
 
 typedef struct {
     unsigned int weapon_type;
-    SDL_bool activated;
-    SDL_bool is_in_use;
     float weapon_angle;
     uint64_t x_distance;
     uint64_t y_distance;
@@ -195,6 +209,7 @@ typedef struct {
     DISPLACEMENT displacement[AEC_ENTITY_COUNT];
     DRAWABLE drawable[AEC_ENTITY_COUNT];
     VELOCITY velocity[AEC_ENTITY_COUNT];
+    AGGRESSIVE aggressive[AEC_ENTITY_COUNT];
     MASK mask[AEC_ENTITY_COUNT];
     CHARACTER_SPRITE character_sprite[AEC_ENTITY_COUNT];
     TRAIL trail[AEC_ENTITY_COUNT];

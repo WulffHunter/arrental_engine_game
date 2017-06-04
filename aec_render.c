@@ -27,7 +27,7 @@ void AEC_Render_Entity(AEC_EntityCatalog* entityCatalog, unsigned int entity_at,
             }
             if (entityCatalog->entity_components[entity_at].component_mask[AEC_CHARACTER_SPRITE])
             {
-                AEC_CharacterSprite_Render(&entityCatalog->character_sprite[entity_at], &entityCatalog->displacement[entity_at], camera, renderer, step);
+                AEC_CharacterSprite_Render(entityCatalog, entity_at, camera, renderer, step);
             }
         }
     }

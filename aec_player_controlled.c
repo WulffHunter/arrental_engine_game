@@ -104,7 +104,7 @@ void AEC_PlayerControlled_GetInput(AEC_EntityCatalog* entityCatalog, unsigned in
                     double axis_x = 0;
                     double axis_y = 0;
                     
-                    if (event.jaxis.axis == 0)
+                    /*if (event.jaxis.axis == 0)
                     {
                         axis_x = entityCatalog->player_controlled[entity_at].jaxis_x = event.jaxis.value;
                         axis_y = entityCatalog->player_controlled[entity_at].jaxis_y;
@@ -113,7 +113,10 @@ void AEC_PlayerControlled_GetInput(AEC_EntityCatalog* entityCatalog, unsigned in
                     {
                         axis_x = entityCatalog->player_controlled[entity_at].jaxis_x;
                         axis_y = entityCatalog->player_controlled[entity_at].jaxis_y = event.jaxis.value;
-                    }
+                    }*/
+                    
+                    axis_x = SDL_JoystickGetAxis(SDL_JoystickFromInstanceID(event.jaxis.which), 0);
+                    axis_y = SDL_JoystickGetAxis(SDL_JoystickFromInstanceID(event.jaxis.which), 1);
                     
                     //printf("Currently at: %f, %f: %f\n", axis_x,axis_y, AE_VectorLength(axis_x, axis_y));
                     

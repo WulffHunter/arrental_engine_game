@@ -39,12 +39,11 @@ const float SCREENSHAKE_LENGTH = 0.2;
 const float SCREENSHAKE_AMOUNT = 2;
 
 char* CHAR_SHEET = "/Users/JJ/Documents/arrental_engine/arrental_engine/Images/character_spritesheet.png";
+char* CHAR_FACES = "/Users/JJ/Documents/arrental_engine/arrental_engine/Images/basic_faces.png";
 char* CHAR_MASK = "/Users/JJ/Documents/arrental_engine/arrental_engine/Images/character_mask.png";
 char* SWORD_PIC = "/Users/JJ/Documents/arrental_engine/arrental_engine/Images/character_mask.png";
 char* GRASS = "/Users/JJ/Documents/arrental_engine/arrental_engine/Images/basic_grass.png";
 char* LAND_OR_WATER = "/Users/JJ/Documents/arrental_engine/arrental_engine/Images/land_and_water.png";
-char* CHAR_SHEET_ADDR = "Images/character_spritesheet.png";
-
 //
 //
 //GRASS TILER
@@ -64,7 +63,7 @@ typedef struct
 
 grass_tiler* grasstiler_create(AE_LinkedTexture* texture, uint64_t seed, Uint8 set)
 {
-    grass_tiler* output = malloc(sizeof(grass_tiler));
+    grass_tiler* output = SDL_malloc(sizeof(grass_tiler));
     
     output->sprite = AE_CreateSprite(texture, 0, 0, 20, 32, 16, 0, 0);
     
@@ -157,7 +156,7 @@ typedef struct
 world_tiler* worldtiler_create(AE_LinkedTexture* texture, uint64_t seed, Uint8 set)
 {
     Uint8 temp = 0;
-    world_tiler* output = malloc(sizeof(world_tiler));
+    world_tiler* output = SDL_malloc(sizeof(world_tiler));
     
     output->sprite = AE_CreateSprite(texture, 0, 0, 2, 5, 5, 0, 0);
     
@@ -245,6 +244,8 @@ int main(int argc, const char* argv[])
         
         SDL_Event e;
         
+        printf("%s\n", SDL_GetBasePath());
+        
         //SETTING UP THE VIEWPORTS
         SDL_Rect viewports[PLAYER_COUNT];
         unsigned int target_entities[PLAYER_COUNT];
@@ -272,11 +273,13 @@ int main(int argc, const char* argv[])
         
         //Testing AEComponents
         SDL_Texture* spriteSheetTexture = AE_LoadTextureFromFile(windowBundle->renderer, CHAR_SHEET);
+        SDL_Texture* facesTexture = AE_LoadTextureFromFile(windowBundle->renderer, CHAR_FACES);
         SDL_Texture* maskTexture = AE_LoadTextureFromFile(windowBundle->renderer, CHAR_MASK);
         SDL_Texture* grassTexture = AE_LoadTextureFromFile(windowBundle->renderer, GRASS);
         //SDL_Texture* lowTexture = AE_LoadTextureFromFile(windowBundle->renderer, LAND_OR_WATER);
         
         AE_LinkedTexture* spriteSheet = AE_CreateLinkedTexture(spriteSheetTexture);
+        AE_LinkedTexture* faces = AE_CreateLinkedTexture(facesTexture);
         AE_LinkedTexture* char_mask = AE_CreateLinkedTexture(maskTexture);
         AE_LinkedTexture* grassLinked = AE_CreateLinkedTexture(grassTexture);
         //AE_LinkedTexture* land_water = AE_CreateLinkedTexture(lowTexture);
@@ -285,18 +288,19 @@ int main(int argc, const char* argv[])
         AE_Sprite* tile_sprite = AE_CreateSprite(grassLinked, 0, 0, 20, 32, 16, 0, 0);
         //world_tiler* world_tiler = worldtiler_create(land_water, seed, grass_set);
         
-        AEC_EntityCatalog* entityCatalog = malloc(sizeof(AEC_EntityCatalog));
+        AEC_EntityCatalog* entityCatalog = SDL_malloc(sizeof(AEC_EntityCatalog));
         AEC_SpriteBuffer* spriteBuffer = AEC_SpriteBuffer_CreateNew();
         
         for (int i = 0; i < TEST_CITIZEN_NUM; i++)
         {
-            AEC_Character_CreateNew(entityCatalog, spriteSheet, char_mask);
+            AEC_Character_CreateNew(entityCatalog, spriteSheet, faces, char_mask);
             entityCatalog->displacement[i].x = AE_Random(32, SCREEN_WIDTH-32);
             entityCatalog->displacement[i].y = AE_Random(32, SCREEN_HEIGHT-32);
         }
         AEC_PlayerControlled_SetPlayable(entityCatalog, 1, true, 0);
         SDL_Keycode keys[6] = {SDLK_w, SDLK_s, SDLK_a, SDLK_d, SDLK_f, SDLK_SPACE};
         AEC_PlayerControlled_SetPlayerKeys(entityCatalog, 1, keys);
+        AEC_CharacterSprite_SetTarget(entityCatalog, 0, 1);
         
         AEC_PlayerControlled_SetPlayable(entityCatalog, 2, true, 1);
         SDL_Keycode keys_dual[6] = {SDLK_UP, SDLK_DOWN, SDLK_LEFT, SDLK_RIGHT, SDLK_f, SDLK_SPACE};
@@ -358,6 +362,7 @@ int main(int argc, const char* argv[])
             SDL_RenderClear(windowBundle->renderer);
             
             AEC_Step_TimeEvent(entityCatalog, time);
+            //printf("moving = %d, xVel = %f, yVel = %f\n", entityCatalog->velocity[0].moving, entityCatalog->velocity[0].xVel, entityCatalog->velocity[0].yVel);
             
             //worldtiler_render(world_tiler, windowBundle->renderer, time);
             

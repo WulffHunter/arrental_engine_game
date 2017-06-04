@@ -81,28 +81,38 @@ void AEC_Velocity_UpdateSimple(AEC_EntityCatalog* entityCatalog, unsigned int en
                 }
                 moving = SDL_TRUE;
             }
+            
             if (!moving)
             {
                 xVel = yVel = 0;
                 
-                /*if (yVel < 0)
+                /*if (yVel + accel_yVel <= 0)
                 {
                     yVel += accel_yVel;
                 }
-                else if (yVel > 0)
+                else if (yVel - accel_yVel >= 0)
                 {
                     yVel -= accel_yVel;
                 }
-                if (xVel < 0)
+                else
+                {
+                    yVel = 0;
+                }
+                
+                if (xVel + accel_xVel <= 0)
                 {
                     xVel += accel_xVel;
                 }
-                else if (xVel > 0)
+                else if (xVel - accel_xVel >= 0)
                 {
                     xVel -= accel_xVel;
+                }
+                else
+                {
+                    xVel = 0;
                 }*/
             }
-            if (moving)
+            else
             {
                 if (!entityCatalog->velocity[entity_at].moving)
                 {

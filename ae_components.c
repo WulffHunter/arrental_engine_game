@@ -48,7 +48,7 @@ uint64_t AEC_GetIsoDepth(AEC_EntityCatalog* entityCatalog, unsigned int entity_a
 AE_ColorBundle* AEC_GetRandomSkinColor()
 {
     int_least8_t darken = (int_least8_t )AE_Random(0, 4);
-    AE_ColorBundle* output = malloc(sizeof(AE_ColorBundle));
+    AE_ColorBundle* output = SDL_malloc(sizeof(AE_ColorBundle));
     Uint8 r = (Uint8)AE_Random(231, 255);
     Uint8 g = (Uint8)AE_Random(164, 216);
     Uint8 b = (Uint8)AE_Random(102, 165);
@@ -78,7 +78,7 @@ AE_ColorBundle* AEC_GetRandomSkinColor()
 
 AEC_Camera* AEC_Camera_CreateNew(uint64_t x, uint64_t y, uint64_t w, uint64_t h)
 {
-    AEC_Camera* output = malloc(sizeof(AEC_Camera));
+    AEC_Camera* output = SDL_malloc(sizeof(AEC_Camera));
     output->x = x;
     output->y = y;
     output->w = w;

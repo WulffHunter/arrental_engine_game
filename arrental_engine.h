@@ -614,6 +614,17 @@ int AE_PseudoRandomFromSeed_Uint64(Uint64 seed, Uint64 x, Uint64 y, Uint64 set, 
 int AE_PointDistance(int x1, int y1, int x2, int y2);
 
 /**
+ Returns the distance between two points as a double
+ 
+ @param x1 The x of the first point
+ @param y1 The y of the first point
+ @param x2 The x of the second point
+ @param y2 The y of the second point
+ @return The distance between two points as a double
+ */
+double AE_PointDistance_D(uint64_t x1, uint64_t y1, uint64_t x2, uint64_t y2);
+
+/**
  Returns a float rounded to floor or ceil depending on if it's less than 0
  
  @param input The original float
